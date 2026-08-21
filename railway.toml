@@ -1,0 +1,10 @@
+[build]
+  builder = "NIXPACKS"
+  buildCommand = "npm install && npm run build --workspace=@unicom/types && npm run build --workspace=@unicom/config && npm run build --workspace=@unicom/validation && npm run build --workspace=@unicom/api"
+
+[deploy]
+  startCommand = "node apps/api/dist/main.js"
+  healthcheckPath = "/api/v1/health"
+  healthcheckTimeout = 30
+  restartPolicyType = "ON_FAILURE"
+  restartPolicyMaxRetries = 3

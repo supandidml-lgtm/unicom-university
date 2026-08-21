@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { SystemRole, JobProfile, AccountStatus } from "@unicom/types";
+import { getBaseApiUrl } from "@/lib/api-client";
 
 export interface AuthUser {
   id: string;
@@ -53,7 +54,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const login = useCallback(async (identifier: string, password: string) => {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api/v1";
+    const apiUrl = getBaseApiUrl();
     const res = await fetch(`${apiUrl}/auth/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },

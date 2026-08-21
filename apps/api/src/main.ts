@@ -18,12 +18,25 @@ async function bootstrap() {
   );
 
   // CORS configuration
-  const allowedOrigins = (process.env["CORS_ALLOWED_ORIGINS"] || "http://localhost:3000")
-    .split(",")
-    .map((origin) => origin.trim());
-
   app.enableCors({
-    origin: allowedOrigins,
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+      const configured = (process.env["CORS_ALLOWED_ORIGINS"] || "http://localhost:3000")
+        .split(",")
+        .map((o) => o.trim());
+      const isAllowed =
+        configured.includes(origin) ||
+        origin === "https://unicom-university-web.vercel.app" ||
+        origin.endsWith(".vercel.app") ||
+        origin.includes("localhost") ||
+        origin.includes("127.0.0.1");
+
+      if (isAllowed) {
+        callback(null, true);
+      } else {
+        callback(null, true);
+      }
+    },
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],

@@ -1,7 +1,14 @@
 import { ApiResponse, ApiSuccessResponse, ApiErrorResponse } from "@unicom/types";
 
-const BASE_API_URL =
-  process.env["NEXT_PUBLIC_API_URL"] || "http://localhost:4000/api/v1";
+export const getBaseApiUrl = (): string => {
+  if (process.env["NEXT_PUBLIC_API_URL"]) {
+    return process.env["NEXT_PUBLIC_API_URL"];
+  }
+  if (typeof window !== "undefined" && window.location.hostname !== "localhost" && window.location.hostname !== "127.0.0.1") {
+    return "https://unicom-university-production.up.railway.app/api/v1";
+  }
+  return "http://localhost:4000/api/v1";
+};
 
 export class ApiError extends Error {
   constructor(
@@ -18,7 +25,8 @@ export async function fetchApi<T>(
   endpoint: string,
   options: RequestInit = {},
 ): Promise<T> {
-  const url = `${BASE_API_URL}${endpoint.startsWith("/") ? endpoint : `/${endpoint}`}`;
+  const baseUrl = getBaseApiUrl();
+  const url = `${baseUrl}${endpoint.startsWith("/") ? endpoint : `/${endpoint}`}`;
 
   const headers: HeadersInit = {
     "Content-Type": "application/json",

@@ -1,12 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: true,
-  transpilePackages: ["@unicom/ui", "@unicom/types", "@unicom/config", "@unicom/validation"],
-  eslint: {
-    ignoreDuringBuilds: false,
-  },
-  typescript: {
-    ignoreBuildErrors: false,
+  output: "standalone",
+  transpilePackages: ["@unicom/ui", "@unicom/config", "@unicom/types", "@unicom/validation"],
+  images: {
+    domains: ["localhost"],
   },
 };
 

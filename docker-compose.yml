@@ -1,0 +1,96 @@
+version: "3.8"
+
+services:
+  # 1. Primary Relational Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: unicom-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: unicom_university
+      POSTGRES_USER: unicom_admin
+      POSTGRES_PASSWORD: unicom_secure_password_2026!
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U unicom_admin -d unicom_university"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # 2. Redis Cache & Queue Broker
+  redis:
+    image: redis:7-alpine
+    container_name: unicom-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # 3. Backend REST API Service
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    container_name: unicom-api
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 4000
+      DATABASE_URL: postgresql://unicom_admin:unicom_secure_password_2026!@postgres:5432/unicom_university?schema=public
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: unicom_university_production_jwt_secret_key_2026_super_secure
+      JWT_EXPIRES_IN: 8h
+      CORS_ORIGIN: http://localhost:3000
+    ports:
+      - "4000:4000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # 4. Background Worker Service
+  worker:
+    build:
+      context: .
+      dockerfile: apps/worker/Dockerfile
+    container_name: unicom-worker
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://unicom_admin:unicom_secure_password_2026!@postgres:5432/unicom_university?schema=public
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # 5. Next.js Enterprise Web Client
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    container_name: unicom-web
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      NEXT_PUBLIC_API_URL: http://localhost:4000/api/v1
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+
+volumes:
+  pgdata:
+  redisdata:

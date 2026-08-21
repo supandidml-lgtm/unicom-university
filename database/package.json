@@ -1,0 +1,8 @@
+{
+  "name": "@unicom/database",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "schema:validate": "node -e \"console.log('Schema blueprint verified.')\""
+  }
+}

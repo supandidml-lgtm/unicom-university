@@ -1,0 +1,45 @@
+{
+  "name": "unicom-university",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Unicom University — Enterprise Web-Based Learning Management System",
+  "packageManager": "npm@11.16.0",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "turbo run dev --parallel",
+    "dev:web": "npm run dev --workspace=@unicom/web",
+    "dev:api": "npm run dev --workspace=@unicom/api",
+    "start:web": "npm run start --workspace=@unicom/web",
+    "start:api": "npm run start:prod --workspace=@unicom/api",
+    "build": "turbo run build",
+    "lint": "eslint .",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "test:unit": "turbo run test:unit",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "clean": "turbo run clean"
+  },
+  "overrides": {
+    "postcss": "^8.5.26",
+    "sharp": "^0.35.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.4",
+    "@typescript-eslint/eslint-plugin": "^8.24.0",
+    "@typescript-eslint/parser": "^8.24.0",
+    "eslint": "^9.20.1",
+    "prettier": "^3.5.2",
+    "rimraf": "^6.0.1",
+    "turbo": "^2.4.4",
+    "typescript": "^5.7.3",
+    "vitest": "^3.0.5"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
+  }
+}

@@ -1,11 +1,9 @@
 {
   "version": 2,
-  "name": "unicom-university-web",
   "framework": "nextjs",
-  "rootDirectory": "apps/web",
-  "installCommand": "cd ../.. && npm install",
-  "buildCommand": "cd ../.. && npm run build --workspace=@unicom/types --workspace=@unicom/config --workspace=@unicom/validation --workspace=@unicom/ui && npm run build --workspace=@unicom/web",
-  "outputDirectory": ".next",
+  "installCommand": "npm install",
+  "buildCommand": "npm run build --workspace=@unicom/types && npm run build --workspace=@unicom/config && npm run build --workspace=@unicom/validation && npm run build --workspace=@unicom/ui && cd apps/web && npx next build",
+  "outputDirectory": "apps/web/.next",
   "regions": ["sin1"],
   "env": {
     "NEXT_PUBLIC_API_URL": "https://unicom-api.up.railway.app/api/v1",

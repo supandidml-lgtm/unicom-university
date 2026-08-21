@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { SystemRole } from "@unicom/types";
 import { Sidebar } from "./Sidebar";
 import { Header } from "./Header";
+import { useAuth } from "@/context/AuthContext";
 
 export interface AppShellProps {
   children: React.ReactNode;
@@ -11,7 +12,9 @@ export interface AppShellProps {
 }
 
 export const AppShell: React.FC<AppShellProps> = ({ children, pageTitle }) => {
-  const [currentRole, setCurrentRole] = useState<SystemRole>(SystemRole.STAFF);
+  const { user } = useAuth();
+  // Use real user role; fall back to STAFF for unauthenticated rendering
+  const currentRole = (user?.role as SystemRole) ?? SystemRole.STAFF;
   const [isCollapsed, setIsCollapsed] = useState<boolean>(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
 
@@ -52,7 +55,7 @@ export const AppShell: React.FC<AppShellProps> = ({ children, pageTitle }) => {
       <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
         <Header
           currentRole={currentRole}
-          onRoleChange={(role) => setCurrentRole(role)}
+          onRoleChange={() => {}}
           onToggleMobileMenu={() => setIsMobileMenuOpen(true)}
           pageTitle={pageTitle}
         />

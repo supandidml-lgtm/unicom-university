@@ -51,3 +51,5 @@ uploads/
 scratch/
 tmp/
 temp/
+
+.vercel

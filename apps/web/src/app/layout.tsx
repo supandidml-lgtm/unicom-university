@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { AuthProvider } from "@/context/AuthContext";
+import { AuthGuard } from "@/components/auth/AuthGuard";
 
 export const metadata: Metadata = {
   title: "Unicom University — Enterprise Learning Management System",
@@ -14,7 +16,11 @@ export default function RootLayout({
   return (
     <html lang="id" className="h-full bg-white">
       <body className="h-full antialiased text-slate-900 bg-white selection:bg-blue-100 selection:text-blue-900">
-        {children}
+        <AuthProvider>
+          <AuthGuard>
+            {children}
+          </AuthGuard>
+        </AuthProvider>
       </body>
     </html>
   );

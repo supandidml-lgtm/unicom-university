@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
-import { Eye, EyeOff, GraduationCap, AlertCircle, CheckCircle2 } from "lucide-react";
+import { Eye, EyeOff, GraduationCap, AlertCircle, CheckCircle2, RotateCcw } from "lucide-react";
 
 export default function LoginPage() {
   const { login, isAuthenticated, isLoading } = useAuth();
@@ -16,6 +16,27 @@ export default function LoginPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
+
+  const handleClearCache = () => {
+    try {
+      localStorage.clear();
+      sessionStorage.clear();
+      if (typeof window !== "undefined" && "caches" in window) {
+        caches.keys().then((names) => {
+          names.forEach((name) => caches.delete(name));
+        });
+      }
+      setIdentifier("");
+      setPassword("");
+      setError(null);
+      setSuccessMsg("Semua cache browser & data sesi berhasil dibersihkan.");
+      setTimeout(() => {
+        window.location.reload();
+      }, 400);
+    } catch {
+      window.location.reload();
+    }
+  };
 
   useEffect(() => {
     if (searchParams.get("passwordChanged") === "true") {
@@ -232,7 +253,19 @@ export default function LoginPage() {
             </p>
           </div>
 
-          <p className="text-center text-xs text-slate-400 mt-6">
+          <div className="mt-4 flex justify-center">
+            <button
+              type="button"
+              onClick={handleClearCache}
+              className="text-xs text-slate-400 hover:text-slate-700 flex items-center gap-1.5 py-1 px-2.5 rounded-full hover:bg-slate-200/60 transition"
+              title="Hapus cache & session lokal browser"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+              <span>Bersihkan Cache & Reset Browser</span>
+            </button>
+          </div>
+
+          <p className="text-center text-xs text-slate-400 mt-4">
             Unicom University © 2026 · Platform Pelatihan Internal
           </p>
         </div>

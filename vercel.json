@@ -9,5 +9,24 @@
     "NEXT_PUBLIC_API_URL": "https://unicom-university-production.up.railway.app/api/v1",
     "NEXT_PUBLIC_APP_URL": "https://unicom-university-web.vercel.app",
     "NODE_ENV": "production"
-  }
+  },
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0"
+        },
+        {
+          "key": "Pragma",
+          "value": "no-cache"
+        },
+        {
+          "key": "Expires",
+          "value": "0"
+        }
+      ]
+    }
+  ]
 }

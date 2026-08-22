@@ -23,6 +23,7 @@ import {
   Copy,
   Check,
   Key,
+  MessageSquare,
 } from "lucide-react";
 
 interface Employee {
@@ -30,6 +31,7 @@ interface Employee {
   nik: string;
   name: string;
   email: string;
+  phone?: string;
   role: string;
   jobProfile: string;
   branch: string;
@@ -116,6 +118,7 @@ export default function AdminUsersPage() {
   const [newNik, setNewNik] = useState("");
   const [newName, setNewName] = useState("");
   const [newEmail, setNewEmail] = useState("");
+  const [newPhone, setNewPhone] = useState("");
   const [newRole, setNewRole] = useState("STAFF");
   const [newBranch, setNewBranch] = useState("Jakarta Pusat");
   const [newPassword, setNewPassword] = useState("UnicomPassword2026!");
@@ -125,10 +128,19 @@ export default function AdminUsersPage() {
     name: string;
     nik: string;
     email: string;
+    phone?: string;
     role: string;
     password: string;
   } | null>(null);
   const [copied, setCopied] = useState(false);
+
+  const formatWhatsAppPhone = (phone: string) => {
+    let clean = phone.replace(/[^0-9]/g, "");
+    if (clean.startsWith("0")) {
+      clean = "62" + clean.slice(1);
+    }
+    return clean;
+  };
 
   const handleAddEmployee = () => {
     if (!newNik.trim() || !newName.trim() || !newEmail.trim()) {
@@ -141,6 +153,7 @@ export default function AdminUsersPage() {
       nik: newNik.toUpperCase().trim(),
       name: newName.trim(),
       email: newEmail.toLowerCase().trim(),
+      phone: newPhone.trim() || undefined,
       role: newRole,
       jobProfile: newRole === "STAFF" ? "TECHNICIAN" : "ADMIN",
       branch: newBranch,
@@ -156,6 +169,7 @@ export default function AdminUsersPage() {
       name: newName.trim(),
       nik: newNik.toUpperCase().trim(),
       email: newEmail.toLowerCase().trim(),
+      phone: newPhone.trim() || undefined,
       role: newRole,
       password: newPassword.trim() || "UnicomPassword2026!",
     });
@@ -163,6 +177,7 @@ export default function AdminUsersPage() {
     setNewNik("");
     setNewName("");
     setNewEmail("");
+    setNewPhone("");
     setNewPassword("UnicomPassword2026!");
   };
 
@@ -363,13 +378,23 @@ export default function AdminUsersPage() {
             onChange={(e) => setNewName(e.target.value)}
           />
 
-          <Input
-            label="Email Resmi Unicom"
-            type="email"
-            placeholder="Contoh: fajar.nugraha@unicom.co.id"
-            value={newEmail}
-            onChange={(e) => setNewEmail(e.target.value)}
-          />
+          <div className="grid grid-cols-2 gap-3">
+            <Input
+              label="Email Resmi Unicom"
+              type="email"
+              placeholder="Contoh: fajar.nugraha@unicom.co.id"
+              value={newEmail}
+              onChange={(e) => setNewEmail(e.target.value)}
+            />
+
+            <Input
+              label="Nomor WhatsApp / HP (Opsional)"
+              type="tel"
+              placeholder="Contoh: 081234567890"
+              value={newPhone}
+              onChange={(e) => setNewPhone(e.target.value)}
+            />
+          </div>
 
           <div className="grid grid-cols-2 gap-3">
             <Select
@@ -426,7 +451,7 @@ export default function AdminUsersPage() {
         isOpen={!!createdCredential}
         onClose={() => setCreatedCredential(null)}
         title="Akun Karyawan Berhasil Dibuat! 🎉"
-        description="Salin dan kirimkan informasi login ini kepada karyawan yang bersangkutan."
+        description="Salin atau kirimkan langsung informasi login ini kepada karyawan yang bersangkutan."
         maxWidth="md"
       >
         {createdCredential && (
@@ -444,6 +469,12 @@ export default function AdminUsersPage() {
                 <span className="text-slate-500 font-sans">Email:</span>
                 <span className="text-slate-800">{createdCredential.email}</span>
               </div>
+              {createdCredential.phone && (
+                <div className="flex justify-between border-b border-slate-200 pb-1.5">
+                  <span className="text-slate-500 font-sans">WhatsApp / HP:</span>
+                  <span className="text-emerald-700 font-semibold">{createdCredential.phone}</span>
+                </div>
+              )}
               <div className="flex justify-between border-b border-slate-200 pb-1.5">
                 <span className="text-slate-500 font-sans">Role:</span>
                 <span className="font-semibold text-slate-800">{createdCredential.role}</span>
@@ -460,17 +491,31 @@ export default function AdminUsersPage() {
             </div>
 
             <div className="flex flex-col gap-2">
+              {createdCredential.phone && (
+                <a
+                  href={`https://wa.me/${formatWhatsAppPhone(createdCredential.phone)}?text=${encodeURIComponent(
+                    `Halo *${createdCredential.name}*,\n\nBerikut adalah akun akses *Unicom University* Anda:\n🌐 Portal: https://unicom-university-web.vercel.app/login\n👤 NIK / Username: *${createdCredential.nik}*\n📧 Email: ${createdCredential.email}\n🔑 Password Sementara: *${createdCredential.password}*\n\n_Catatan: Anda akan diminta membuat password baru saat login pertama kali demi keamanan akun._`
+                  )}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs py-2.5 px-4 rounded-[6px] transition flex items-center justify-center gap-2 shadow-sm"
+                >
+                  <MessageSquare className="w-4 h-4" />
+                  <span>Kirim Langsung via WhatsApp ({createdCredential.phone})</span>
+                </a>
+              )}
+
               <Button
-                variant="primary"
+                variant={createdCredential.phone ? "outline" : "primary"}
                 onClick={() =>
                   copyToClipboard(
                     `Halo ${createdCredential.name},\n\nBerikut adalah akun akses Unicom University Anda:\n🌐 Portal: https://unicom-university-web.vercel.app/login\n👤 NIK / Username: ${createdCredential.nik}\n📧 Email: ${createdCredential.email}\n🔑 Password Sementara: ${createdCredential.password}\n\n*Catatan: Anda akan diminta membuat password baru saat login pertama kali demi keamanan akun.*`
                   )
                 }
-                leftIcon={copied ? <Check className="w-4 h-4 text-emerald-300" /> : <Copy className="w-4 h-4" />}
+                leftIcon={copied ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
                 className="w-full justify-center"
               >
-                {copied ? "Tersalin ke Clipboard! ✓" : "Salin Format Pesan (WhatsApp / Email)"}
+                {copied ? "Tersalin ke Clipboard! ✓" : "Salin Teks Pesan (Manual)"}
               </Button>
 
               <Button variant="outline" onClick={() => setCreatedCredential(null)} className="w-full justify-center">

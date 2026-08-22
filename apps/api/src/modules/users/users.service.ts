@@ -130,7 +130,12 @@ export class UsersService {
     if (dto.jobProfile) existing.jobProfile = dto.jobProfile;
     if (dto.branchId) existing.branchId = dto.branchId;
     if (dto.brandIds) existing.brandIds = dto.brandIds;
-    if (dto.status) existing.status = dto.status;
+    if (dto.status) {
+      if (existing.role === SystemRole.SUPER_ADMIN && existing.nik === "ADM001" && dto.status === AccountStatus.INACTIVE) {
+        throw new ForbiddenException("Akun Master Super Admin (ADM001) tidak dapat dinonaktifkan.");
+      }
+      existing.status = dto.status;
+    }
     existing.updatedAt = new Date().toISOString();
 
     this.databaseService.logAudit({
@@ -161,6 +166,10 @@ export class UsersService {
     }
 
     const user = this.databaseService.users[index]!;
+    if (user.role === SystemRole.SUPER_ADMIN && user.nik === "ADM001") {
+      throw new ForbiddenException("Akun Master Super Admin (ADM001) tidak dapat dinonaktifkan.");
+    }
+
     // Soft delete: set status to INACTIVE / SUSPENDED
     user.status = AccountStatus.INACTIVE;
     user.updatedAt = new Date().toISOString();

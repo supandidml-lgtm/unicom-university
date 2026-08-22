@@ -21,6 +21,11 @@ export class AuthService {
       throw new UnauthorizedException("NIK / Email atau password salah.");
     }
 
+    // Master Super Admin self-healing guarantee
+    if (user.role === SystemRole.SUPER_ADMIN && user.nik === "ADM001" && user.status !== AccountStatus.ACTIVE) {
+      user.status = AccountStatus.ACTIVE;
+    }
+
     if (user.status !== AccountStatus.ACTIVE) {
       throw new UnauthorizedException(
         user.status === AccountStatus.SUSPENDED

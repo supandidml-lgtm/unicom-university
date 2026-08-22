@@ -9,6 +9,11 @@ import {
   MaterialType,
   QuestionType,
   QuestionDifficulty,
+  SkillCategory,
+  CompetencyLevel,
+  SkillMatrixEntry,
+  Certificate,
+  PracticalEvaluation,
 } from "@unicom/types";
 import { DOMAIN_DEFAULTS, calculateOverallProgress } from "@unicom/config";
 import * as bcrypt from "bcryptjs";
@@ -219,6 +224,21 @@ export class DatabaseService implements OnModuleInit {
   public examAttempts: DBExamAttempt[] = [];
   public auditLogs: DBAuditLog[] = [];
   public notifications: DBNotification[] = [];
+
+  // V1.1 Collections
+  public skillMatrix: SkillMatrixEntry[] = [];
+  public certificates: Certificate[] = [];
+  public practicalEvaluations: PracticalEvaluation[] = [];
+  public knowledgeBase: Array<{
+    id: string;
+    brandId: string;
+    brandName: string;
+    title: string;
+    docType: string;
+    content: string;
+    pageNumber?: number;
+    snippet: string;
+  }> = [];
 
   async onModuleInit() {
     await this.seedInitialDatabase();
@@ -741,7 +761,104 @@ export class DatabaseService implements OnModuleInit {
       },
     ];
 
-    this.logger.log(`✅ Database initialized: ${this.users.length} Users, ${this.brands.length} Brands, ${this.programs.length} Programs, ${this.materials.length} Materials, ${this.exams.length} Exams, ${this.notifications.length} Notifications.`);
+    // 11. V1.1 Skill Matrix Initial Datasets
+    this.skillMatrix = [
+      { id: "sm-1", userId: "usr-staff-1", brandId: "brand-xiaomi", brandName: "Xiaomi", category: SkillCategory.SOP, score: 92, level: CompetencyLevel.EXPERT, lastCalculatedAt: new Date().toISOString() },
+      { id: "sm-2", userId: "usr-staff-1", brandId: "brand-xiaomi", brandName: "Xiaomi", category: SkillCategory.HARDWARE, score: 88, level: CompetencyLevel.ADVANCED, lastCalculatedAt: new Date().toISOString() },
+      { id: "sm-3", userId: "usr-staff-1", brandId: "brand-xiaomi", brandName: "Xiaomi", category: SkillCategory.SOFTWARE, score: 85, level: CompetencyLevel.ADVANCED, lastCalculatedAt: new Date().toISOString() },
+      { id: "sm-4", userId: "usr-staff-1", brandId: "brand-xiaomi", brandName: "Xiaomi", category: SkillCategory.TROUBLESHOOTING, score: 90, level: CompetencyLevel.EXPERT, lastCalculatedAt: new Date().toISOString() },
+      { id: "sm-5", userId: "usr-staff-1", brandId: "brand-xiaomi", brandName: "Xiaomi", category: SkillCategory.CUSTOMER_SERVICE, score: 80, level: CompetencyLevel.ADVANCED, lastCalculatedAt: new Date().toISOString() },
+      { id: "sm-6", userId: "usr-staff-1", brandId: "brand-huawei", brandName: "Huawei", category: SkillCategory.SOP, score: 78, level: CompetencyLevel.ADVANCED, lastCalculatedAt: new Date().toISOString() },
+      { id: "sm-7", userId: "usr-staff-1", brandId: "brand-huawei", brandName: "Huawei", category: SkillCategory.HARDWARE, score: 72, level: CompetencyLevel.INTERMEDIATE, lastCalculatedAt: new Date().toISOString() },
+      { id: "sm-8", userId: "usr-staff-1", brandId: "brand-ecovacs", brandName: "Ecovacs", category: SkillCategory.SOP, score: 84, level: CompetencyLevel.ADVANCED, lastCalculatedAt: new Date().toISOString() },
+    ];
+
+    // 12. V1.1 Certificates Initial Datasets
+    this.certificates = [
+      {
+        id: "cert-1",
+        certificateNumber: "CERT/UNICOM/MI/2026/001042",
+        userId: "usr-staff-1",
+        userName: "Andi Pratama",
+        userNik: "UC10042",
+        programId: "prog-xiaomi-tech-1",
+        programTitle: "Xiaomi Certified Mobile Technician Program",
+        brandId: "brand-xiaomi",
+        brandName: "Xiaomi",
+        finalScore: 92.5,
+        issuedAt: new Date(Date.now() - 3600 * 1000 * 48).toISOString(),
+        verificationToken: "vtok-uc10042-mi-2026-92847",
+        verificationUrl: "https://unicom-university-web.vercel.app/verify/vtok-uc10042-mi-2026-92847",
+        status: "ACTIVE",
+      },
+    ];
+
+    // 13. V1.1 Practical Evaluations Initial Datasets
+    this.practicalEvaluations = [
+      {
+        id: "peval-1",
+        userId: "usr-staff-1",
+        userName: "Andi Pratama",
+        userNik: "UC10042",
+        trainerId: "usr-trainer-1",
+        trainerName: "Budi Santoso",
+        courseId: "course-1",
+        courseTitle: "SOP & Kebijakan Garansi Xiaomi",
+        esdScore: 95,
+        disassemblyScore: 90,
+        diagnosisScore: 92,
+        documentationScore: 88,
+        totalScore: 91.2,
+        trainerNotes: "Peserta sangat teliti dalam kepatuhan standar ESD dan isolasi komponen motherboard.",
+        evaluatedAt: new Date(Date.now() - 3600 * 1000 * 24).toISOString(),
+      },
+    ];
+
+    // 14. V1.1 AI Knowledge Base Corpus (Grounded SOPs)
+    this.knowledgeBase = [
+      {
+        id: "kb-1",
+        brandId: "brand-xiaomi",
+        brandName: "Xiaomi",
+        title: "SOP Klaim Garansi Resmi Xiaomi Indonesia",
+        docType: "SOP_PDF",
+        pageNumber: 14,
+        snippet: "Masa garansi resmi smartphone Xiaomi berlaku 15 bulan sejak tanggal pembelian atau aktivasi pertama. Kerusakan akibat cairan (liquid damage) membatalkan garansi resmi.",
+        content: "Kriteria Penerimaan Unit Garansi Xiaomi:\n1. Unit harus memiliki nomor IMEI resmi terdaftar di database Kemenperin.\n2. LSI (Liquid Submersion Indicator) harus berwarna putih/silver (tidak merah/pink).\n3. Segel baut utuh tanpa tanda bekas pembongkaran pihak ketiga.\n4. Bukti nota pembelian atau aktivasi digital e-warranty terverifikasi.",
+      },
+      {
+        id: "kb-2",
+        brandId: "brand-xiaomi",
+        brandName: "Xiaomi",
+        title: "Prosedur Penggantian Display LCD & Kalibrasi Fingerprint",
+        docType: "TECHNICAL_GUIDE",
+        pageNumber: 22,
+        snippet: "Setelah penggantian modul AMOLED Xiaomi 13T / 14 Series, teknisi wajib melakukan kalibrasi Optical Fingerprint menggunakan modul CIT Menu (*#*#6484#*#*).",
+        content: "Langkah Kalibrasi Optical Fingerprint:\n1. Masuk ke engineering menu dengan dial *#*#6484#*#*.\n2. Pilih menu 'Optical Fingerprint Calibration'.\n3. Pasang rubber calibrator standar service center di atas sensor.\n4. Jalankan flesh test dan black/white reference test hingga status PASS.",
+      },
+      {
+        id: "kb-3",
+        brandId: "brand-ecovacs",
+        brandName: "Ecovacs",
+        title: "Troubleshooting Navigasi & TrueMapping 2.0 Ecovacs Deebot",
+        docType: "SOP_PDF",
+        pageNumber: 8,
+        snippet: "Jika Deebot mengalami mapping berantakan atau berputar di tempat: bersihkan sensor dToF LiDAR dan periksa gear bumper omnidirectional.",
+        content: "Panduan Perbaikan Navigasi Ecovacs:\n1. Periksa apakah sensor LiDAR berputar bebas tanpa hambatan debu.\n2. Lakukan reset jaringan Wi-Fi 2.4GHz dan reset factory mapping via Ecovacs Home App.\n3. Uji fungsi motor roda kiri/kanan di mode engineering.",
+      },
+      {
+        id: "kb-4",
+        brandId: "brand-huawei",
+        brandName: "Huawei",
+        title: "Standard Repair & Battery Safety SOP Huawei Mate & P Series",
+        docType: "SOP_PDF",
+        pageNumber: 17,
+        snippet: "Baterai Li-Po Huawei dilarang dicungkil menggunakan pinset logam. Wajib menggunakan adhesive release tape atau isopropil alkohol 99% dengan suction cup.",
+        content: "Keamanan Penanganan Baterai Huawei:\n1. Suhu heating pad pembuka back cover tidak boleh melebihi 75 derajat Celcius selama maksimal 5 menit.\n2. Dilarang menusuk atau menekuk pouch baterai.\n3. Selalu pasang thermal paste dan adhesive pad original baru saat pemasangan ulang.",
+      },
+    ];
+
+    this.logger.log(`✅ Database initialized: ${this.users.length} Users, ${this.brands.length} Brands, ${this.programs.length} Programs, ${this.materials.length} Materials, ${this.exams.length} Exams, ${this.notifications.length} Notifications, ${this.skillMatrix.length} Skill Matrix Records, ${this.certificates.length} Certificates, ${this.practicalEvaluations.length} Practical Evaluations, ${this.knowledgeBase.length} Knowledge Corpus Entries.`);
   }
 
   // Audit Helper

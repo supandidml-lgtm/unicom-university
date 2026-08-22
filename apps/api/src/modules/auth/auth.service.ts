@@ -1,7 +1,7 @@
 import { Injectable, UnauthorizedException, BadRequestException } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import { DatabaseService, DBUser } from "../../database/database.service";
-import { AccountStatus } from "@unicom/types";
+import { AccountStatus, SystemRole } from "@unicom/types";
 import * as bcrypt from "bcryptjs";
 
 @Injectable()

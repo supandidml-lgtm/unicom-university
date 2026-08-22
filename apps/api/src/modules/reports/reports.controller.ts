@@ -17,4 +17,9 @@ export class ReportsController {
   async getExportData() {
     return this.reportsService.getExportData();
   }
+
+  @Get("multi-branch")
+  async getMultiBranchAnalytics() {
+    return this.reportsService.getMultiBranchAnalytics();
+  }
 }

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
 import { AuthGuard } from "@/components/auth/AuthGuard";
+import { AiKnowledgeAssistant } from "@/components/AiKnowledgeAssistant";
 
 export const metadata: Metadata = {
   title: "Unicom University — Enterprise Learning Management System",
@@ -19,6 +20,7 @@ export default function RootLayout({
         <AuthProvider>
           <AuthGuard>
             {children}
+            <AiKnowledgeAssistant />
           </AuthGuard>
         </AuthProvider>
       </body>

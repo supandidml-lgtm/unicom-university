@@ -6,3 +6,4 @@ export * from "./progress";
 export * from "./exam";
 export * from "./jobs";
 export * from "./entities";
+export * from "./v11";

@@ -13,6 +13,10 @@ import { ExamModule } from "./modules/exam/exam.module";
 import { ReportsModule } from "./modules/reports/reports.module";
 import { AuditModule } from "./modules/audit/audit.module";
 import { NotificationModule } from "./modules/notifications/notification.module";
+import { CompetencyModule } from "./modules/competency/competency.module";
+import { CertificatesModule } from "./modules/certificates/certificates.module";
+import { EvaluationModule } from "./modules/evaluation/evaluation.module";
+import { AssistantModule } from "./modules/assistant/assistant.module";
 
 @Module({
   imports: [
@@ -31,6 +35,10 @@ import { NotificationModule } from "./modules/notifications/notification.module"
     ReportsModule,
     AuditModule,
     NotificationModule,
+    CompetencyModule,
+    CertificatesModule,
+    EvaluationModule,
+    AssistantModule,
     HealthModule,
   ],
 })

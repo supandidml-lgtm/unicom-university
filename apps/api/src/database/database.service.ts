@@ -14,6 +14,8 @@ import {
   SkillMatrixEntry,
   Certificate,
   PracticalEvaluation,
+  SupervisorCoachingPlan,
+  EmployeeLearningPassport,
 } from "@unicom/types";
 import { DOMAIN_DEFAULTS, calculateOverallProgress } from "@unicom/config";
 import * as bcrypt from "bcryptjs";
@@ -229,6 +231,7 @@ export class DatabaseService implements OnModuleInit {
   public skillMatrix: SkillMatrixEntry[] = [];
   public certificates: Certificate[] = [];
   public practicalEvaluations: PracticalEvaluation[] = [];
+  public coachingPlans: SupervisorCoachingPlan[] = [];
   public knowledgeBase: Array<{
     id: string;
     brandId: string;
@@ -858,7 +861,30 @@ export class DatabaseService implements OnModuleInit {
       },
     ];
 
-    this.logger.log(`✅ Database initialized: ${this.users.length} Users, ${this.brands.length} Brands, ${this.programs.length} Programs, ${this.materials.length} Materials, ${this.exams.length} Exams, ${this.notifications.length} Notifications, ${this.skillMatrix.length} Skill Matrix Records, ${this.certificates.length} Certificates, ${this.practicalEvaluations.length} Practical Evaluations, ${this.knowledgeBase.length} Knowledge Corpus Entries.`);
+    // Seed Initial Coaching Plan
+    this.coachingPlans = [
+      {
+        id: "coach-plan-1",
+        userId: "usr-staff-1",
+        userName: "Andi Pratama",
+        userNik: "UC10042",
+        supervisorId: "usr-spv-1",
+        supervisorName: "Siti Rahmawati",
+        branchId: "branch-jkt-pusat",
+        branchName: "Service Center Jakarta Pusat",
+        weakCompetency: SkillCategory.TROUBLESHOOTING,
+        gapScore: 22,
+        coachingTopic: "Pendampingan Diagnosa Jalur VPH_PWR & Deteksi Short Circuit PMIC",
+        assignedTrainerId: "usr-trainer-1",
+        assignedTrainerName: "Budi Santoso",
+        targetDate: "2026-09-15",
+        status: "IN_PROGRESS",
+        notes: "Peserta menunjukkan pemahaman teori baik namun membutuhkan bimbingan penggunaan thermal camera dan multimeter meja servis.",
+        createdAt: new Date().toISOString(),
+      },
+    ];
+
+    this.logger.log(`✅ Database initialized: ${this.users.length} Users, ${this.brands.length} Brands, ${this.programs.length} Programs, ${this.materials.length} Materials, ${this.exams.length} Exams, ${this.notifications.length} Notifications, ${this.skillMatrix.length} Skill Matrix Records, ${this.certificates.length} Certificates, ${this.practicalEvaluations.length} Practical Evaluations, ${this.coachingPlans.length} Coaching Plans, ${this.knowledgeBase.length} Knowledge Corpus Entries.`);
   }
 
   // Audit Helper

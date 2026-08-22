@@ -16,6 +16,12 @@ export class CompetencyController {
     return this.competencyService.getUserCompetencyProfile(userId);
   }
 
+  @Get("passport/:userIdOrNik")
+  @Roles(SystemRole.SUPER_ADMIN, SystemRole.TRAINER, SystemRole.SUPERVISOR, SystemRole.STAFF)
+  async getPassport(@Param("userIdOrNik") userIdOrNik: string) {
+    return this.competencyService.getLearningPassport(userIdOrNik);
+  }
+
   @Get("matrix")
   @Roles(SystemRole.SUPER_ADMIN, SystemRole.TRAINER, SystemRole.SUPERVISOR)
   async getSkillMatrix(@Query("branchId") branchId?: string) {

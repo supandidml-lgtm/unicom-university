@@ -122,3 +122,54 @@ export interface MultiBranchAnalytics {
     overdue: number;
   };
 }
+
+export interface EmployeeLearningPassport {
+  passportId: string;
+  userId: string;
+  nik: string;
+  fullName: string;
+  branchName: string;
+  jobProfile: string;
+  joinedDate: string;
+  currentCareerLevel: "FOUNDATION" | "BRAND_CERTIFIED" | "ADVANCED" | "MASTER" | "EXPERT";
+  careerProgressPercent: number;
+  certifications: Certificate[];
+  competencyProfile: UserCompetencyProfile;
+  practicalAssessments: PracticalEvaluation[];
+  historicalStats: {
+    totalProgramsCompleted: number;
+    totalExamsPassed: number;
+    averageExamScore: number;
+    totalPracticalPassed: number;
+    practicalPassRate: number;
+  };
+  immutableActivityLog: Array<{
+    id: string;
+    action: string;
+    targetTitle: string;
+    score?: number;
+    timestamp: string;
+    actor: string;
+  }>;
+}
+
+export interface SupervisorCoachingPlan {
+  id: string;
+  userId: string;
+  userName: string;
+  userNik: string;
+  supervisorId: string;
+  supervisorName: string;
+  branchId: string;
+  branchName: string;
+  weakCompetency: SkillCategory;
+  gapScore: number; // e.g. 58 vs target 80 = gap 22
+  coachingTopic: string;
+  assignedTrainerId: string;
+  assignedTrainerName: string;
+  targetDate: string;
+  status: "PENDING" | "IN_PROGRESS" | "COMPLETED" | "REASSESSED";
+  notes?: string;
+  reassessmentScore?: number;
+  createdAt: string;
+}

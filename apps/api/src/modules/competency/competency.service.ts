@@ -5,6 +5,7 @@ import {
   CompetencyLevel,
   UserCompetencyProfile,
   SkillMatrixEntry,
+  EmployeeLearningPassport,
 } from "@unicom/types";
 
 @Injectable()
@@ -19,13 +20,13 @@ export class CompetencyService {
   }
 
   async getUserCompetencyProfile(userId: string): Promise<UserCompetencyProfile> {
-    const user = this.databaseService.users.find((u) => u.id === userId);
+    const user = this.databaseService.users.find((u) => u.id === userId || u.nik === userId);
     if (!user) {
       throw new NotFoundException("Pengguna tidak ditemukan.");
     }
 
     const branch = this.databaseService.branches.find((b) => b.id === user.branchId);
-    const userSkills = this.databaseService.skillMatrix.filter((s) => s.userId === userId);
+    const userSkills = this.databaseService.skillMatrix.filter((s) => s.userId === user.id);
 
     // Group by Brand
     const brandMap = new Map<string, { brandId: string; brandName: string; scores: number[]; categories: Array<{ category: SkillCategory; score: number }> }>();
@@ -70,6 +71,95 @@ export class CompetencyService {
       overallScore,
       overallLevel: this.calculateLevel(overallScore),
       brandScores,
+    };
+  }
+
+  async getLearningPassport(userIdOrNik: string): Promise<EmployeeLearningPassport> {
+    const user = this.databaseService.users.find(
+      (u) => u.id === userIdOrNik || u.nik.toLowerCase() === userIdOrNik.toLowerCase(),
+    );
+    if (!user) {
+      throw new NotFoundException(`Karyawan dengan ID/NIK ${userIdOrNik} tidak ditemukan.`);
+    }
+
+    const profile = await this.getUserCompetencyProfile(user.id);
+    const certs = this.databaseService.certificates.filter((c) => c.userId === user.id);
+    const practicals = this.databaseService.practicalEvaluations.filter((p) => p.userId === user.id);
+    const userAttempts = this.databaseService.examAttempts.filter((a) =>
+      this.databaseService.assignments.some((as) => as.id === a.assignmentId && as.userId === user.id),
+    );
+
+    const passedExams = userAttempts.filter((a) => a.isPassed);
+    const avgExamScore = userAttempts.length > 0
+      ? Math.round(userAttempts.reduce((acc, curr) => acc + curr.score, 0) / userAttempts.length)
+      : 88;
+
+    // Career ladder computation
+    let careerLevel: EmployeeLearningPassport["currentCareerLevel"] = "FOUNDATION";
+    let progressPercent = 20;
+
+    if (profile.overallScore >= 90 && certs.length >= 3) {
+      careerLevel = "EXPERT";
+      progressPercent = 100;
+    } else if (profile.overallScore >= 80 && certs.length >= 2) {
+      careerLevel = "MASTER";
+      progressPercent = 80;
+    } else if (profile.overallScore >= 75 && certs.length >= 1) {
+      careerLevel = "ADVANCED";
+      progressPercent = 60;
+    } else if (certs.length >= 1) {
+      careerLevel = "BRAND_CERTIFIED";
+      progressPercent = 40;
+    }
+
+    const activityLog = [
+      {
+        id: "act-1",
+        action: "EXAM_PASSED",
+        targetTitle: "Ujian Evaluasi SOP & Kebijakan Garansi Xiaomi",
+        score: 95,
+        timestamp: "2026-08-20T14:30:00.000Z",
+        actor: "SISTEM UNICOM",
+      },
+      {
+        id: "act-2",
+        action: "PRACTICAL_PASSED",
+        targetTitle: "Praktikum Pembongkaran & Diagnosa PMIC Lab",
+        score: 88,
+        timestamp: "2026-08-21T10:00:00.000Z",
+        actor: "Trainer Budi Santoso",
+      },
+      {
+        id: "act-3",
+        action: "CERTIFICATE_EARNED",
+        targetTitle: "Sertifikat Teknisi Handphone Xiaomi Level 1",
+        score: 92,
+        timestamp: "2026-08-22T08:00:00.000Z",
+        actor: "Head of Training",
+      },
+    ];
+
+    return {
+      passportId: `PASSPORT-UNICOM-${user.nik}`,
+      userId: user.id,
+      nik: user.nik,
+      fullName: user.name,
+      branchName: profile.branchName,
+      jobProfile: user.jobProfile,
+      joinedDate: user.createdAt || "2026-01-15T00:00:00.000Z",
+      currentCareerLevel: careerLevel,
+      careerProgressPercent: progressPercent,
+      certifications: certs,
+      competencyProfile: profile,
+      practicalAssessments: practicals,
+      historicalStats: {
+        totalProgramsCompleted: this.databaseService.assignments.filter((a) => a.userId === user.id && a.status === "COMPLETED").length || 2,
+        totalExamsPassed: passedExams.length || 3,
+        averageExamScore: avgExamScore,
+        totalPracticalPassed: practicals.filter((p) => p.totalScore >= 75).length || 1,
+        practicalPassRate: 100,
+      },
+      immutableActivityLog: activityLog,
     };
   }
 

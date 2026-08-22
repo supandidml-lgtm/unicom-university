@@ -17,6 +17,7 @@ import { CompetencyModule } from "./modules/competency/competency.module";
 import { CertificatesModule } from "./modules/certificates/certificates.module";
 import { EvaluationModule } from "./modules/evaluation/evaluation.module";
 import { AssistantModule } from "./modules/assistant/assistant.module";
+import { CoachingModule } from "./modules/coaching/coaching.module";
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { AssistantModule } from "./modules/assistant/assistant.module";
     CertificatesModule,
     EvaluationModule,
     AssistantModule,
+    CoachingModule,
     HealthModule,
   ],
 })

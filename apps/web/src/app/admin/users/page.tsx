@@ -20,6 +20,9 @@ import {
   UserPlus,
   UserX,
   UserCheck,
+  Copy,
+  Check,
+  Key,
 } from "lucide-react";
 
 interface Employee {
@@ -115,6 +118,17 @@ export default function AdminUsersPage() {
   const [newEmail, setNewEmail] = useState("");
   const [newRole, setNewRole] = useState("STAFF");
   const [newBranch, setNewBranch] = useState("Jakarta Pusat");
+  const [newPassword, setNewPassword] = useState("UnicomPassword2026!");
+  
+  // Credential Created Popup State
+  const [createdCredential, setCreatedCredential] = useState<{
+    name: string;
+    nik: string;
+    email: string;
+    role: string;
+    password: string;
+  } | null>(null);
+  const [copied, setCopied] = useState(false);
 
   const handleAddEmployee = () => {
     if (!newNik.trim() || !newName.trim() || !newEmail.trim()) {
@@ -136,9 +150,26 @@ export default function AdminUsersPage() {
 
     setEmployees([newEmp, ...employees]);
     setIsAddOpen(false);
+
+    // Show credential confirmation popup for Admin to copy & send to employee
+    setCreatedCredential({
+      name: newName.trim(),
+      nik: newNik.toUpperCase().trim(),
+      email: newEmail.toLowerCase().trim(),
+      role: newRole,
+      password: newPassword.trim() || "UnicomPassword2026!",
+    });
+
     setNewNik("");
     setNewName("");
     setNewEmail("");
+    setNewPassword("UnicomPassword2026!");
+  };
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2500);
   };
 
   const toggleUserStatus = (id: string) => {
@@ -367,6 +398,18 @@ export default function AdminUsersPage() {
             />
           </div>
 
+          <div>
+            <Input
+              label="Password Sementara (Initial Temporary Password)"
+              placeholder="UnicomPassword2026!"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+            />
+            <p className="text-[11px] text-slate-500 mt-1">
+              💡 Karyawan akan diwajibkan mengganti password ini saat pertama kali login (PRD §15).
+            </p>
+          </div>
+
           <div className="pt-2 flex justify-end gap-2">
             <Button variant="outline" onClick={() => setIsAddOpen(false)}>
               Batal
@@ -376,6 +419,66 @@ export default function AdminUsersPage() {
             </Button>
           </div>
         </div>
+      </Modal>
+
+      {/* Modal: Konfirmasi Kredensial Berhasil Dibuat */}
+      <Modal
+        isOpen={!!createdCredential}
+        onClose={() => setCreatedCredential(null)}
+        title="Akun Karyawan Berhasil Dibuat! 🎉"
+        description="Salin dan kirimkan informasi login ini kepada karyawan yang bersangkutan."
+        maxWidth="md"
+      >
+        {createdCredential && (
+          <div className="space-y-4">
+            <div className="bg-slate-50 border border-slate-200 rounded-[8px] p-4 space-y-2.5 text-xs font-mono">
+              <div className="flex justify-between border-b border-slate-200 pb-1.5">
+                <span className="text-slate-500 font-sans">Nama:</span>
+                <span className="font-bold text-slate-900">{createdCredential.name}</span>
+              </div>
+              <div className="flex justify-between border-b border-slate-200 pb-1.5">
+                <span className="text-slate-500 font-sans">NIK / Username:</span>
+                <span className="font-bold text-blue-600">{createdCredential.nik}</span>
+              </div>
+              <div className="flex justify-between border-b border-slate-200 pb-1.5">
+                <span className="text-slate-500 font-sans">Email:</span>
+                <span className="text-slate-800">{createdCredential.email}</span>
+              </div>
+              <div className="flex justify-between border-b border-slate-200 pb-1.5">
+                <span className="text-slate-500 font-sans">Role:</span>
+                <span className="font-semibold text-slate-800">{createdCredential.role}</span>
+              </div>
+              <div className="flex justify-between items-center pt-1 bg-amber-50 -mx-4 -mb-4 p-3 rounded-b-[8px] border-t border-amber-200">
+                <div className="flex items-center gap-1.5 text-amber-800 font-sans font-semibold">
+                  <Key className="w-3.5 h-3.5 text-amber-600" />
+                  <span>Password Sementara:</span>
+                </div>
+                <span className="font-bold text-amber-900 bg-white px-2 py-0.5 rounded border border-amber-300">
+                  {createdCredential.password}
+                </span>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <Button
+                variant="primary"
+                onClick={() =>
+                  copyToClipboard(
+                    `Halo ${createdCredential.name},\n\nBerikut adalah akun akses Unicom University Anda:\n🌐 Portal: https://unicom-university-web.vercel.app/login\n👤 NIK / Username: ${createdCredential.nik}\n📧 Email: ${createdCredential.email}\n🔑 Password Sementara: ${createdCredential.password}\n\n*Catatan: Anda akan diminta membuat password baru saat login pertama kali demi keamanan akun.*`
+                  )
+                }
+                leftIcon={copied ? <Check className="w-4 h-4 text-emerald-300" /> : <Copy className="w-4 h-4" />}
+                className="w-full justify-center"
+              >
+                {copied ? "Tersalin ke Clipboard! ✓" : "Salin Format Pesan (WhatsApp / Email)"}
+              </Button>
+
+              <Button variant="outline" onClick={() => setCreatedCredential(null)} className="w-full justify-center">
+                Tutup
+              </Button>
+            </div>
+          </div>
+        )}
       </Modal>
     </AppShell>
   );

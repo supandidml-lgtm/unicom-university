@@ -28,8 +28,19 @@ export async function fetchApi<T>(
   const baseUrl = getBaseApiUrl();
   const url = `${baseUrl}${endpoint.startsWith("/") ? endpoint : `/${endpoint}`}`;
 
+  let token = "";
+  if (typeof window !== "undefined") {
+    try {
+      const stored = localStorage.getItem("unicom_session");
+      if (stored) {
+        token = JSON.parse(stored).token || "";
+      }
+    } catch {}
+  }
+
   const headers: HeadersInit = {
     "Content-Type": "application/json",
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
     ...(options.headers || {}),
   };
 

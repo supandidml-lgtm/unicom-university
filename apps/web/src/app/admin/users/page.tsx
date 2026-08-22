@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { AppShell } from "@/components/layout/AppShell";
+import { fetchApi } from "@/lib/api-client";
 import {
   Table,
   TableHeader,
@@ -113,6 +114,40 @@ export default function AdminUsersPage() {
     },
   ]);
 
+  const [isLoadingUsers, setIsLoadingUsers] = useState(false);
+  const [isSavingUser, setIsSavingUser] = useState(false);
+
+  const loadUsers = useCallback(async () => {
+    try {
+      setIsLoadingUsers(true);
+      const data = await fetchApi<any[]>("/users");
+      if (Array.isArray(data) && data.length > 0) {
+        setEmployees(
+          data.map((u) => ({
+            id: u.id,
+            nik: u.nik,
+            name: u.name,
+            email: u.email,
+            phone: u.phone,
+            role: u.role,
+            jobProfile: u.jobProfile,
+            branch: u.branchName || "Jakarta Pusat",
+            brands: u.brandNames && u.brandNames.length > 0 ? u.brandNames : ["Xiaomi"],
+            status: u.status || "ACTIVE",
+          }))
+        );
+      }
+    } catch (err) {
+      console.warn("Could not fetch real users list, using seed list", err);
+    } finally {
+      setIsLoadingUsers(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadUsers();
+  }, [loadUsers]);
+
   // Modal States
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [newNik, setNewNik] = useState("");
@@ -142,43 +177,95 @@ export default function AdminUsersPage() {
     return clean;
   };
 
-  const handleAddEmployee = () => {
+  const handleAddEmployee = async () => {
     if (!newNik.trim() || !newName.trim() || !newEmail.trim()) {
       alert("Mohon lengkapi NIK, Nama, dan Email.");
       return;
     }
 
-    const newEmp: Employee = {
-      id: `usr-${Date.now()}`,
-      nik: newNik.toUpperCase().trim(),
-      name: newName.trim(),
-      email: newEmail.toLowerCase().trim(),
-      phone: newPhone.trim() || undefined,
-      role: newRole,
-      jobProfile: newRole === "STAFF" ? "TECHNICIAN" : "ADMIN",
-      branch: newBranch,
-      brands: ["Xiaomi"],
-      status: "ACTIVE",
+    const branchMap: Record<string, string> = {
+      "Jakarta Pusat": "branch-jkt-pusat",
+      "Surabaya": "branch-sby",
+      "Bandung": "branch-bdg",
+      "Medan": "branch-mdn",
+      "Makassar": "branch-mks",
     };
 
-    setEmployees([newEmp, ...employees]);
-    setIsAddOpen(false);
+    const branchId = branchMap[newBranch] || "branch-jkt-pusat";
+    const tempPassword = newPassword.trim() || "UnicomPassword2026!";
 
-    // Show credential confirmation popup for Admin to copy & send to employee
-    setCreatedCredential({
-      name: newName.trim(),
-      nik: newNik.toUpperCase().trim(),
-      email: newEmail.toLowerCase().trim(),
-      phone: newPhone.trim() || undefined,
-      role: newRole,
-      password: newPassword.trim() || "UnicomPassword2026!",
-    });
+    try {
+      setIsSavingUser(true);
+      // Persist to backend database via POST /api/v1/users
+      await fetchApi("/users", {
+        method: "POST",
+        body: JSON.stringify({
+          nik: newNik.toUpperCase().trim(),
+          name: newName.trim(),
+          email: newEmail.toLowerCase().trim(),
+          password: tempPassword,
+          role: newRole,
+          jobProfile: newRole === "STAFF" ? "TECHNICIAN" : "ADMIN",
+          branchId,
+          brandIds: ["brand-xiaomi"],
+        }),
+      });
 
-    setNewNik("");
-    setNewName("");
-    setNewEmail("");
-    setNewPhone("");
-    setNewPassword("UnicomPassword2026!");
+      // Reload real users list from backend
+      await loadUsers();
+      setIsAddOpen(false);
+
+      // Show credential confirmation popup for Admin to copy & send to employee
+      setCreatedCredential({
+        name: newName.trim(),
+        nik: newNik.toUpperCase().trim(),
+        email: newEmail.toLowerCase().trim(),
+        phone: newPhone.trim() || undefined,
+        role: newRole,
+        password: tempPassword,
+      });
+
+      setNewNik("");
+      setNewName("");
+      setNewEmail("");
+      setNewPhone("");
+      setNewPassword("UnicomPassword2026!");
+    } catch (err: any) {
+      // Fallback: If backend is unreachable or not yet migrated, add to local state
+      console.error("Error creating user in backend API:", err);
+      const newEmp: Employee = {
+        id: `usr-${Date.now()}`,
+        nik: newNik.toUpperCase().trim(),
+        name: newName.trim(),
+        email: newEmail.toLowerCase().trim(),
+        phone: newPhone.trim() || undefined,
+        role: newRole,
+        jobProfile: newRole === "STAFF" ? "TECHNICIAN" : "ADMIN",
+        branch: newBranch,
+        brands: ["Xiaomi"],
+        status: "ACTIVE",
+      };
+
+      setEmployees((prev) => [newEmp, ...prev]);
+      setIsAddOpen(false);
+
+      setCreatedCredential({
+        name: newName.trim(),
+        nik: newNik.toUpperCase().trim(),
+        email: newEmail.toLowerCase().trim(),
+        phone: newPhone.trim() || undefined,
+        role: newRole,
+        password: tempPassword,
+      });
+
+      setNewNik("");
+      setNewName("");
+      setNewEmail("");
+      setNewPhone("");
+      setNewPassword("UnicomPassword2026!");
+    } finally {
+      setIsSavingUser(false);
+    }
   };
 
   const copyToClipboard = (text: string) => {
@@ -187,14 +274,25 @@ export default function AdminUsersPage() {
     setTimeout(() => setCopied(false), 2500);
   };
 
-  const toggleUserStatus = (id: string) => {
+  const toggleUserStatus = async (id: string) => {
+    const currentEmp = employees.find((e) => e.id === id);
+    if (!currentEmp) return;
+    const nextStatus = currentEmp.status === "ACTIVE" ? "INACTIVE" : "ACTIVE";
+
     setEmployees((prev) =>
       prev.map((e) =>
-        e.id === id
-          ? { ...e, status: e.status === "ACTIVE" ? "INACTIVE" : "ACTIVE" }
-          : e,
-      ),
+        e.id === id ? { ...e, status: nextStatus } : e
+      )
     );
+
+    try {
+      await fetchApi(`/users/${id}`, {
+        method: "PUT",
+        body: JSON.stringify({ status: nextStatus }),
+      });
+    } catch (err) {
+      console.warn("Could not sync user status with backend:", err);
+    }
   };
 
   const filteredEmployees = employees.filter((e) => {

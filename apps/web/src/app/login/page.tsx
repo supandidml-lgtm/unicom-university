@@ -168,15 +168,68 @@ export default function LoginPage() {
             </form>
           </div>
 
-          {/* Demo credentials hint */}
+          {/* Demo credentials hint with 1-click fill */}
           <div className="mt-4 bg-blue-50 border border-blue-200 rounded-[8px] p-4">
-            <p className="text-xs font-bold text-blue-800 mb-2">Akun Demo (Password: UnicomPassword2026!)</p>
-            <div className="space-y-1 text-xs text-blue-700">
-              <div className="flex justify-between"><span className="font-medium">Super Admin</span><span>admin@unicom.co.id</span></div>
-              <div className="flex justify-between"><span className="font-medium">Trainer</span><span>trainer@unicom.co.id</span></div>
-              <div className="flex justify-between"><span className="font-medium">Supervisor</span><span>supervisor.jkt@unicom.co.id</span></div>
-              <div className="flex justify-between"><span className="font-medium">Staff/Teknisi</span><span>andi.pratama@unicom.co.id</span></div>
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-xs font-bold text-blue-800">Akun Siap Pakai (Klik untuk Isi Otomatis)</p>
+              <span className="text-[10px] text-blue-600 font-semibold bg-blue-100 px-1.5 py-0.5 rounded">1-Click Fill</span>
             </div>
+            <div className="space-y-1.5 text-xs text-blue-700">
+              <button
+                type="button"
+                onClick={() => {
+                  setIdentifier("admin@unicom.co.id");
+                  setPassword("UnicomPassword2026!");
+                  setError(null);
+                }}
+                className="w-full flex justify-between items-center p-1.5 rounded hover:bg-blue-100/70 transition text-left"
+              >
+                <span className="font-medium text-slate-800">👑 Super Admin</span>
+                <span className="font-mono text-[11px] text-blue-800">admin@unicom.co.id</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setIdentifier("trainer@unicom.co.id");
+                  setPassword("UnicomPassword2026!");
+                  setError(null);
+                }}
+                className="w-full flex justify-between items-center p-1.5 rounded hover:bg-blue-100/70 transition text-left"
+              >
+                <span className="font-medium text-slate-800">🎓 Trainer</span>
+                <span className="font-mono text-[11px] text-blue-800">trainer@unicom.co.id</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setIdentifier("supervisor.jkt@unicom.co.id");
+                  setPassword("UnicomPassword2026!");
+                  setError(null);
+                }}
+                className="w-full flex justify-between items-center p-1.5 rounded hover:bg-blue-100/70 transition text-left"
+              >
+                <span className="font-medium text-slate-800">👔 Supervisor</span>
+                <span className="font-mono text-[11px] text-blue-800">supervisor.jkt@unicom.co.id</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setIdentifier("andi.pratama@unicom.co.id");
+                  setPassword("UnicomPassword2026!");
+                  setError(null);
+                }}
+                className="w-full flex justify-between items-center p-1.5 rounded hover:bg-blue-100/70 transition text-left"
+              >
+                <span className="font-medium text-slate-800">🔧 Staff / Teknisi</span>
+                <span className="font-mono text-[11px] text-blue-800">andi.pratama@unicom.co.id</span>
+              </button>
+            </div>
+            <p className="text-[10px] text-slate-500 mt-2 text-center">
+              Password default: <code className="font-bold text-slate-700 bg-white px-1 py-0.5 rounded border border-slate-200">UnicomPassword2026!</code>
+            </p>
           </div>
 
           <p className="text-center text-xs text-slate-400 mt-6">

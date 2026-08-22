@@ -39,13 +39,13 @@ export class UsersController {
   }
 
   @Post()
-  @Roles(SystemRole.SUPER_ADMIN)
+  @Roles(SystemRole.SUPER_ADMIN, SystemRole.TRAINER)
   async createUser(@Body() dto: CreateUserDto, @CurrentUser("email") actorEmail: string) {
     return this.usersService.createUser(dto, actorEmail);
   }
 
   @Put(":id")
-  @Roles(SystemRole.SUPER_ADMIN)
+  @Roles(SystemRole.SUPER_ADMIN, SystemRole.TRAINER)
   async updateUser(
     @Param("id") id: string,
     @Body() dto: UpdateUserDto,
@@ -55,7 +55,7 @@ export class UsersController {
   }
 
   @Delete(":id")
-  @Roles(SystemRole.SUPER_ADMIN)
+  @Roles(SystemRole.SUPER_ADMIN, SystemRole.TRAINER)
   async deleteUser(@Param("id") id: string, @CurrentUser("email") actorEmail: string) {
     return this.usersService.deleteUser(id, actorEmail);
   }

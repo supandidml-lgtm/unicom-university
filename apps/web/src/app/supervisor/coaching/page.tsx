@@ -4,13 +4,9 @@ import React, { useEffect, useState } from "react";
 import { fetchApi } from "@/lib/api-client";
 import {
   UserCheck,
-  AlertTriangle,
   CheckCircle,
   PlusCircle,
-  Calendar,
-  Wrench,
   Sparkles,
-  Save,
 } from "lucide-react";
 import { SupervisorCoachingPlan, SkillCategory } from "@unicom/types";
 

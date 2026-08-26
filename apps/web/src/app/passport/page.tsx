@@ -8,11 +8,9 @@ import {
   Calendar,
   CheckCircle,
   FileText,
-  UserCheck,
   TrendingUp,
   Download,
   QrCode,
-  Flame,
   Check,
 } from "lucide-react";
 import { EmployeeLearningPassport } from "@unicom/types";

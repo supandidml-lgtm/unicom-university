@@ -63,7 +63,7 @@ export class CoachingService {
       action: "COACHING_PLAN_CREATED",
       resource: "COACHING_PLAN",
       resourceId: plan.id,
-      payload: { userId: user.id, topic: plan.coachingTopic },
+      details: { userId: user.id, topic: plan.coachingTopic },
     });
 
     return plan;
@@ -107,7 +107,7 @@ export class CoachingService {
       action: "COACHING_REASSESSED",
       resource: "COACHING_PLAN",
       resourceId: plan.id,
-      payload: { score: dto.reassessmentScore, status: plan.status },
+      details: { score: dto.reassessmentScore, status: plan.status },
     });
 
     return plan;

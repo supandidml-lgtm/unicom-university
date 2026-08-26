@@ -3,14 +3,12 @@
 import React, { useEffect, useState, useMemo } from "react";
 import {
   Search,
-  BookOpen,
   Award,
   Video,
   FileText,
   Building2,
   Sparkles,
   ArrowRight,
-  Clock,
   X,
   Command,
 } from "lucide-react";

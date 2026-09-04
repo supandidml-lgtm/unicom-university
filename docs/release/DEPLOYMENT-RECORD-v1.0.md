@@ -4,8 +4,8 @@ Status: **NOT DEPLOYED**
 
 | Field                            | Recorded value                                |
 | -------------------------------- | --------------------------------------------- |
-| Proposed release candidate       | `v1.0.0-rc.1` — not created or tagged         |
-| Source commit SHA                | Unavailable: repository has no `HEAD` commit  |
+| Release candidate                | `v1.0.0-rc.1` — annotated tag                 |
+| Source commit SHA                | `48f48b47f5a20f6505986d15da03dc5eff0b32a7`    |
 | Build artifact / image digest    | Unavailable                                   |
 | Deployment environment           | No authorized production environment supplied |
 | Database migration               | Not run in production                         |

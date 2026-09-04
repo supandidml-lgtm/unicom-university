@@ -4,7 +4,6 @@
 
 | Severity         | Issue                                                                                              | Status | Owner / action                                              |
 | ---------------- | -------------------------------------------------------------------------------------------------- | ------ | ----------------------------------------------------------- |
-| Release-blocking | No immutable Git `HEAD` exists for RC traceability.                                                | Open   | Repository owner must create and approve a source revision. |
 | Release-blocking | No production topology, credentials/secrets injection, or deployment operator has been authorized. | Open   | Platform/operations owner must provide the approved target. |
 | Release-blocking | Stakeholder UAT and go-live approval have not been recorded.                                       | Open   | Business owner must complete and sign UAT.                  |
 

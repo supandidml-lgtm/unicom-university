@@ -1,0 +1,62 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-unicom_university}
+      POSTGRES_USER: ${POSTGRES_USER:-unicom_app}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB']
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    security_opt:
+      - no-new-privileges:true
+
+  redis:
+    image: redis:7.4-alpine
+    restart: unless-stopped
+    command:
+      [
+        'sh',
+        '-c',
+        'redis-server --appendonly yes $${REDIS_PASSWORD:+--requirepass "$${REDIS_PASSWORD}"}',
+      ]
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ['CMD-SHELL', 'redis-cli $${REDIS_PASSWORD:+-a "$${REDIS_PASSWORD}"} ping | grep PONG']
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    security_opt:
+      - no-new-privileges:true
+
+  clamav:
+    image: clamav/clamav:stable
+    restart: unless-stopped
+    # The scanner is reachable only by the local API host, never from the network.
+    ports:
+      - '127.0.0.1:3310:3310'
+    volumes:
+      - clamav_data:/var/lib/clamav
+    healthcheck:
+      test: ['CMD-SHELL', 'clamdscan --version']
+      interval: 30s
+      timeout: 10s
+      retries: 20
+      start_period: 120s
+    security_opt:
+      - no-new-privileges:true
+
+volumes:
+  postgres_data:
+  redis_data:
+  clamav_data:

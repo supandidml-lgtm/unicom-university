@@ -1,0 +1,966 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserStatus {
+  INVITED
+  ACTIVE
+  SUSPENDED
+  DISABLED
+}
+
+enum AuthSecurityEventType {
+  ACCOUNT_ACTIVATED
+  LOGIN_SUCCESS
+  LOGIN_FAILURE
+  LOGIN_RATE_LIMITED
+  SESSION_CREATED
+  SESSION_REVOKED
+  SESSION_EXPIRED
+  LOGOUT
+  ROLE_CREATED
+  ROLE_UPDATED
+  ROLE_DEACTIVATED
+  ROLE_PERMISSION_UPDATED
+  USER_ROLE_ASSIGNED
+  USER_ROLE_REMOVED
+  AUTHORIZATION_DENIED
+  SUPER_ADMIN_BOOTSTRAPPED
+  BRAND_CREATED
+  BRAND_UPDATED
+  BRAND_ARCHIVED
+  BRAND_REACTIVATED
+  BRAND_ACCESS_ASSIGNED
+  BRAND_ACCESS_REMOVED
+  BRAND_ACCESS_DENIED
+  PARTICIPANT_CREATED
+  PARTICIPANT_UPDATED
+  PARTICIPANT_DISABLED
+  PARTICIPANT_REACTIVATED
+  PARTICIPANT_INVITATION_REISSUED
+  TRAINER_CREATED
+  TRAINER_UPDATED
+  TRAINER_DISABLED
+  TRAINER_REACTIVATED
+  TRAINER_INVITATION_REISSUED
+  STAFF_PROFILE_ACCESS_DENIED
+  STAFF_NIK_VIEWED
+  TRAINING_ENROLLMENT_CREATED
+  TRAINING_ENROLLMENT_BULK_CREATED
+  TRAINING_ENROLLMENT_WEEK_COUNT_UPDATED
+  TRAINING_ENROLLMENT_CANCELLED
+  TRAINING_ENROLLMENT_ACCESS_DENIED
+  CURRICULUM_CREATED
+  CURRICULUM_UPDATED
+  CURRICULUM_ARCHIVED
+  CURRICULUM_VERSION_CREATED
+  CURRICULUM_VERSION_CLONED
+  CURRICULUM_VERSION_PUBLISHED
+  CURRICULUM_VERSION_RETIRED
+  CURRICULUM_WEEK_CREATED
+  CURRICULUM_WEEK_UPDATED
+  CURRICULUM_WEEK_REMOVED
+  CURRICULUM_WEEK_REORDERED
+  CURRICULUM_MODULE_CREATED
+  CURRICULUM_MODULE_UPDATED
+  CURRICULUM_MODULE_REMOVED
+  CURRICULUM_MODULE_REORDERED
+  TRAINING_ENROLLMENT_CURRICULUM_BOUND
+  TRAINING_ENROLLMENT_CURRICULUM_CHANGED
+  MATERIAL_CREATED
+  MATERIAL_UPDATED
+  MATERIAL_REMOVED
+  MATERIAL_REORDERED
+  MATERIAL_FILE_REPLACED
+  FILE_ASSET_UPLOADED
+  FILE_ASSET_READY
+  FILE_ASSET_REJECTED
+  MATERIAL_ACCESS_DENIED
+  LEARNING_MATERIAL_COMPLETED
+  LEARNING_ACTIVITY_REJECTED
+  LEARNING_ACTIVITY_SEQUENCE_REPLAY
+  LEARNING_ACTIVITY_SCOPE_DENIED
+  EXAM_CREATED
+  EXAM_UPDATED
+  EXAM_QUESTION_CREATED
+  EXAM_QUESTION_UPDATED
+  EXAM_QUESTION_APPROVED
+  EXAM_QUESTION_REMOVED
+  EXAM_ATTEMPT_STARTED
+  EXAM_ATTEMPT_SUBMITTED
+  EXAM_ATTEMPT_ACCESS_DENIED
+  TRAINING_ENROLLMENT_STARTED
+  TRAINING_ENROLLMENT_COMPLETED
+  TRAINING_ENROLLMENT_FAILED
+  TRAINING_PROGRESS_ACCESS_DENIED
+  AI_QUESTION_GENERATION_REQUESTED
+  AI_QUESTION_GENERATION_COMPLETED
+  AI_QUESTION_GENERATION_PARTIAL
+  AI_QUESTION_GENERATION_FAILED
+  AI_QUESTION_GENERATION_CANCELLED
+  AI_QUESTION_DRAFT_CREATED
+  REPORT_EXPORT_REQUESTED
+  REPORT_EXPORT_COMPLETED
+  REPORT_EXPORT_FAILED
+  REPORT_EXPORT_DOWNLOADED
+  PASSWORD_RESET_REQUESTED
+  PASSWORD_RESET_COMPLETED
+  PASSWORD_RESET_REJECTED
+  PASSWORD_RESET_RATE_LIMITED
+  INVITATION_DELIVERY_QUEUED
+  INVITATION_DELIVERY_DELIVERED
+  INVITATION_DELIVERY_FAILED
+  NOTIFICATION_DELIVERY_FAILED
+  TRAINING_ASSIGNED_NOTIFICATION_QUEUED
+  TRAINING_COMPLETED_NOTIFICATION_QUEUED
+  CERTIFICATE_ISSUED
+  CERTIFICATE_PDF_GENERATED
+  CERTIFICATE_PDF_FAILED
+  CERTIFICATE_DOWNLOADED
+  CERTIFICATE_REVOKED
+  CERTIFICATE_READY_NOTIFICATION_QUEUED
+}
+
+enum NotificationDeliveryType {
+  PARTICIPANT_INVITATION
+  TRAINER_INVITATION
+  PASSWORD_RESET
+  TRAINING_ASSIGNED
+  TRAINING_COMPLETED
+  CERTIFICATE_READY
+}
+
+enum NotificationDeliveryStatus {
+  QUEUED
+  PROCESSING
+  DELIVERED
+  FAILED
+  DISABLED
+}
+
+enum TrainingCertificateStatus {
+  ISSUED
+  REVOKED
+}
+
+enum CertificatePdfStatus {
+  PENDING
+  PROCESSING
+  READY
+  FAILED
+}
+
+enum BrandStatus {
+  ACTIVE
+  ARCHIVED
+}
+
+enum EnrollmentStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  COMPLETED
+  FAILED
+  EXPIRED
+  SUSPENDED
+  CANCELLED
+}
+
+enum CurriculumStatus {
+  ACTIVE
+  ARCHIVED
+}
+
+enum CurriculumVersionStatus {
+  DRAFT
+  PUBLISHED
+  RETIRED
+}
+
+enum MaterialType {
+  VIDEO
+  PDF
+  IMAGE
+  DOCUMENT
+  SPREADSHEET
+}
+
+enum FileAssetStatus {
+  UPLOADING
+  QUARANTINED
+  READY
+  REJECTED
+  FAILED
+}
+
+enum FileAssetPurpose {
+  LEARNING_MATERIAL
+  CERTIFICATE
+}
+
+enum LearningMaterialProgressStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  COMPLETED
+}
+
+enum LearningActivitySessionType {
+  VIDEO
+  PAGINATED
+  ACKNOWLEDGEMENT
+}
+
+enum ExamQuestionType {
+  SINGLE_CHOICE
+  MULTIPLE_CHOICE
+  TRUE_FALSE
+}
+
+enum ExamQuestionStatus {
+  DRAFT
+  APPROVED
+}
+
+enum ExamQuestionOrigin {
+  MANUAL
+  AI_GENERATED
+}
+
+enum AiQuestionGenerationJobStatus {
+  QUEUED
+  PROCESSING
+  COMPLETED
+  PARTIAL
+  FAILED
+  CANCELLED
+}
+
+enum MaterialSourceExtractionStatus {
+  PENDING
+  PROCESSING
+  READY
+  FAILED
+  UNSUPPORTED
+}
+
+enum MaterialSourceLocatorType {
+  PDF_PAGE
+  DOCUMENT_SECTION
+  SPREADSHEET_RANGE
+  VIDEO_TIMESTAMP
+  IMAGE
+}
+
+enum ExamAttemptStatus {
+  IN_PROGRESS
+  SUBMITTED
+  INVALIDATED
+}
+
+model User {
+  id                          String                    @id @default(uuid()) @db.Uuid
+  email                       String
+  normalizedEmail             String                    @unique
+  passwordHash                String?
+  status                      UserStatus                @default(INVITED)
+  activatedAt                 DateTime?
+  emailVerifiedAt             DateTime?
+  lastLoginAt                 DateTime?
+  createdAt                   DateTime                  @default(now())
+  updatedAt                   DateTime                  @updatedAt
+  sessions                    AuthSession[]
+  invitationTokens            InvitationToken[]
+  passwordResetTokens         PasswordResetToken[]
+  notificationDeliveries      NotificationDelivery[]
+  securityEvents              AuthSecurityEvent[]
+  userRoles                   UserRole[]
+  brandAccess                 UserBrandAccess[]         @relation("UserBrandAccessUser")
+  brandAccessGrants           UserBrandAccess[]         @relation("UserBrandAccessGrantedBy")
+  brandsCreated               Brand[]                   @relation("BrandCreatedBy")
+  brandsUpdated               Brand[]                   @relation("BrandUpdatedBy")
+  staffProfile                StaffProfile?
+  staffProfilesProvisioned    StaffProfile[]            @relation("StaffProfileProvisionedBy")
+  participantEnrollments      TrainingEnrollment[]      @relation("EnrollmentParticipant")
+  certificates                TrainingCertificate[]     @relation("CertificateParticipant")
+  enrollmentsAssigned         TrainingEnrollment[]      @relation("EnrollmentAssignedBy")
+  enrollmentsCancelled        TrainingEnrollment[]      @relation("EnrollmentCancelledBy")
+  curriculaCreated            Curriculum[]              @relation("CurriculumCreatedBy")
+  curriculumVersionsCreated   CurriculumVersion[]       @relation("CurriculumVersionCreatedBy")
+  curriculumVersionsPublished CurriculumVersion[]       @relation("CurriculumVersionPublishedBy")
+  fileAssetsCreated           FileAsset[]               @relation("FileAssetCreatedBy")
+  materialsCreated            LearningMaterial[]        @relation("LearningMaterialCreatedBy")
+  learningActivitySessions    LearningActivitySession[]
+  examsCreated                Exam[]                    @relation("ExamCreatedBy")
+  examQuestionsApproved       ExamQuestion[]            @relation("ExamQuestionApprovedBy")
+  examAttempts                ExamAttempt[]             @relation("ExamAttemptParticipant")
+  aiQuestionGenerationJobs    AiQuestionGenerationJob[]  @relation("AiQuestionGenerationRequestedBy")
+  certificatesIssued          TrainingCertificate[]       @relation("CertificateIssuedBy")
+  certificatesRevoked         TrainingCertificate[]       @relation("CertificateRevokedBy")
+
+  @@index([status])
+}
+
+model StaffProfile {
+  id              String   @id @default(uuid()) @db.Uuid
+  userId          String   @unique @db.Uuid
+  fullName        String
+  phoneNumber     String
+  normalizedPhone String
+  encryptedNik    String
+  nikFingerprint  String   @unique
+  nikFirst4       String
+  nikLast4        String
+  createdByUserId String?  @db.Uuid
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdByUser   User?    @relation("StaffProfileProvisionedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
+
+  @@index([createdByUserId])
+  @@index([normalizedPhone])
+}
+
+model Brand {
+  id              String               @id @default(uuid()) @db.Uuid
+  code            String               @unique
+  name            String
+  description     String?
+  status          BrandStatus          @default(ACTIVE)
+  archivedAt      DateTime?
+  createdByUserId String?              @db.Uuid
+  updatedByUserId String?              @db.Uuid
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+  createdByUser   User?                @relation("BrandCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
+  updatedByUser   User?                @relation("BrandUpdatedBy", fields: [updatedByUserId], references: [id], onDelete: SetNull)
+  userAccess      UserBrandAccess[]
+  enrollments     TrainingEnrollment[]
+  curricula       Curriculum[]
+  certificates    TrainingCertificate[]
+
+  @@index([status])
+}
+
+model TrainingEnrollment {
+  id                  String                     @id @default(uuid()) @db.Uuid
+  participantUserId   String                     @db.Uuid
+  brandId             String                     @db.Uuid
+  plannedWeekCount    Int
+  status              EnrollmentStatus           @default(NOT_STARTED)
+  assignedByUserId    String?                    @db.Uuid
+  assignedAt          DateTime                   @default(now())
+  startedAt           DateTime?
+  completedAt         DateTime?
+  updatedAt           DateTime                   @updatedAt
+  cancelledAt         DateTime?
+  cancelledByUserId   String?                    @db.Uuid
+  curriculumVersionId String?                    @db.Uuid
+  participant         User                       @relation("EnrollmentParticipant", fields: [participantUserId], references: [id], onDelete: Restrict)
+  brand               Brand                      @relation(fields: [brandId], references: [id], onDelete: Restrict)
+  assignedByUser      User?                      @relation("EnrollmentAssignedBy", fields: [assignedByUserId], references: [id], onDelete: SetNull)
+  cancelledByUser     User?                      @relation("EnrollmentCancelledBy", fields: [cancelledByUserId], references: [id], onDelete: SetNull)
+  curriculumVersion   CurriculumVersion?         @relation(fields: [curriculumVersionId], references: [id], onDelete: Restrict)
+  materialProgress    LearningMaterialProgress[]
+  learningSessions    LearningActivitySession[]
+  examAttempts        ExamAttempt[]
+  certificate         TrainingCertificate?
+
+  @@index([participantUserId, assignedAt])
+  @@index([brandId, status])
+  @@index([status, startedAt])
+  @@index([status, completedAt])
+  @@index([curriculumVersionId])
+}
+
+model Curriculum {
+  id              String              @id @default(uuid()) @db.Uuid
+  brandId         String              @db.Uuid
+  code            String
+  name            String
+  description     String?
+  status          CurriculumStatus    @default(ACTIVE)
+  createdByUserId String?             @db.Uuid
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+  archivedAt      DateTime?
+  brand           Brand               @relation(fields: [brandId], references: [id], onDelete: Restrict)
+  createdByUser   User?               @relation("CurriculumCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
+  versions        CurriculumVersion[]
+
+  @@unique([brandId, code])
+  @@index([brandId, status])
+}
+
+model CurriculumVersion {
+  id                String                  @id @default(uuid()) @db.Uuid
+  curriculumId      String                  @db.Uuid
+  versionNumber     Int
+  status            CurriculumVersionStatus @default(DRAFT)
+  createdByUserId   String?                 @db.Uuid
+  publishedByUserId String?                 @db.Uuid
+  publishedAt       DateTime?
+  retiredAt         DateTime?
+  createdAt         DateTime                @default(now())
+  updatedAt         DateTime                @updatedAt
+  curriculum        Curriculum              @relation(fields: [curriculumId], references: [id], onDelete: Restrict)
+  createdByUser     User?                   @relation("CurriculumVersionCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
+  publishedByUser   User?                   @relation("CurriculumVersionPublishedBy", fields: [publishedByUserId], references: [id], onDelete: SetNull)
+  weeks             CurriculumWeek[]
+  enrollments       TrainingEnrollment[]
+  exams             Exam[]
+  aiQuestionGenerationJobs AiQuestionGenerationJob[]
+  certificates       TrainingCertificate[]
+
+  @@unique([curriculumId, versionNumber])
+  @@index([curriculumId, status])
+}
+
+model CurriculumWeek {
+  id                  String             @id @default(uuid()) @db.Uuid
+  curriculumVersionId String             @db.Uuid
+  weekNumber          Int
+  title               String
+  description         String?
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+  curriculumVersion   CurriculumVersion  @relation(fields: [curriculumVersionId], references: [id], onDelete: Cascade)
+  modules             CurriculumModule[]
+  exams               Exam[]
+
+  @@unique([curriculumVersionId, weekNumber])
+  @@index([curriculumVersionId, weekNumber])
+}
+
+model CurriculumModule {
+  id               String             @id @default(uuid()) @db.Uuid
+  curriculumWeekId String             @db.Uuid
+  code             String
+  name             String
+  description      String?
+  sortOrder        Int
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  curriculumWeek   CurriculumWeek     @relation(fields: [curriculumWeekId], references: [id], onDelete: Cascade)
+  materials        LearningMaterial[]
+  exams            Exam[]
+
+  @@unique([curriculumWeekId, code])
+  @@index([curriculumWeekId, sortOrder])
+}
+
+model FileAsset {
+  id                String             @id @default(uuid()) @db.Uuid
+  storageProvider   String
+  storageKey        String             @unique
+  originalFileName  String
+  mimeType          String
+  detectedExtension String
+  sizeBytes         Int
+  sha256            String
+  purpose           FileAssetPurpose   @default(LEARNING_MATERIAL)
+  status            FileAssetStatus    @default(UPLOADING)
+  createdByUserId   String?            @db.Uuid
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  createdByUser     User?              @relation("FileAssetCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
+  materials         LearningMaterial[]
+  durationMs        Int?
+  pageCount         Int?
+  sourceExtractions MaterialSourceExtraction[]
+  certificatePdf    TrainingCertificate? @relation("CertificatePdfAsset")
+
+  @@index([createdByUserId])
+}
+
+model LearningMaterial {
+  id                 String                     @id @default(uuid()) @db.Uuid
+  curriculumModuleId String                     @db.Uuid
+  type               MaterialType
+  title              String
+  description        String?
+  sortOrder          Int
+  fileAssetId        String                     @db.Uuid
+  createdByUserId    String?                    @db.Uuid
+  createdAt          DateTime                   @default(now())
+  updatedAt          DateTime                   @updatedAt
+  curriculumModule   CurriculumModule           @relation(fields: [curriculumModuleId], references: [id], onDelete: Cascade)
+  fileAsset          FileAsset                  @relation(fields: [fileAssetId], references: [id], onDelete: Restrict)
+  createdByUser      User?                      @relation("LearningMaterialCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
+  progress           LearningMaterialProgress[]
+  learningSessions   LearningActivitySession[]
+  aiGenerationJobs   AiQuestionGenerationJobMaterial[]
+  sourceReferences   QuestionSourceReference[]
+
+  @@index([curriculumModuleId, sortOrder])
+  @@index([fileAssetId])
+}
+
+model LearningMaterialProgress {
+  id                     String                         @id @default(uuid()) @db.Uuid
+  enrollmentId           String                         @db.Uuid
+  materialId             String                         @db.Uuid
+  status                 LearningMaterialProgressStatus @default(NOT_STARTED)
+  progressBasisPoints    Int                            @default(0)
+  startedAt              DateTime?
+  lastActivityAt         DateTime?
+  completedAt            DateTime?
+  videoCoverage          Json?
+  pageCoverage           Json?
+  accumulatedDwellMs     Int                            @default(0)
+  lastVerifiedPositionMs Int?
+  createdAt              DateTime                       @default(now())
+  updatedAt              DateTime                       @updatedAt
+  enrollment             TrainingEnrollment             @relation(fields: [enrollmentId], references: [id], onDelete: Restrict)
+  material               LearningMaterial               @relation(fields: [materialId], references: [id], onDelete: Restrict)
+
+  @@unique([enrollmentId, materialId])
+  @@index([enrollmentId, status])
+  @@index([materialId])
+}
+
+model LearningActivitySession {
+  id             String                      @id @default(uuid()) @db.Uuid
+  userId         String                      @db.Uuid
+  enrollmentId   String                      @db.Uuid
+  materialId     String                      @db.Uuid
+  type           LearningActivitySessionType
+  startedAt      DateTime                    @default(now())
+  lastEventAt    DateTime                    @default(now())
+  expiresAt      DateTime
+  lastSequence   Int                         @default(0)
+  lastPositionMs Int?
+  revokedAt      DateTime?
+  createdAt      DateTime                    @default(now())
+  updatedAt      DateTime                    @updatedAt
+  user           User                        @relation(fields: [userId], references: [id], onDelete: Restrict)
+  enrollment     TrainingEnrollment          @relation(fields: [enrollmentId], references: [id], onDelete: Restrict)
+  material       LearningMaterial            @relation(fields: [materialId], references: [id], onDelete: Restrict)
+
+  @@index([userId, expiresAt])
+  @@index([enrollmentId, materialId])
+}
+
+model Exam {
+  id                      String            @id @default(uuid()) @db.Uuid
+  curriculumVersionId     String            @db.Uuid
+  curriculumWeekId        String            @db.Uuid
+  curriculumModuleId      String?           @db.Uuid
+  code                    String
+  title                   String
+  description             String?
+  passingScoreBasisPoints Int
+  maxAttempts             Int?
+  createdByUserId         String?           @db.Uuid
+  createdAt               DateTime          @default(now())
+  updatedAt               DateTime          @updatedAt
+  curriculumVersion       CurriculumVersion @relation(fields: [curriculumVersionId], references: [id], onDelete: Restrict)
+  curriculumWeek          CurriculumWeek    @relation(fields: [curriculumWeekId], references: [id], onDelete: Cascade)
+  curriculumModule        CurriculumModule? @relation(fields: [curriculumModuleId], references: [id], onDelete: Cascade)
+  createdByUser           User?             @relation("ExamCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
+  questions               ExamQuestion[]
+  attempts                ExamAttempt[]
+  aiQuestionGenerationJobs AiQuestionGenerationJob[]
+
+  @@unique([curriculumWeekId, code])
+  @@index([curriculumVersionId])
+  @@index([curriculumModuleId])
+}
+
+model ExamQuestion {
+  id               String               @id @default(uuid()) @db.Uuid
+  examId           String               @db.Uuid
+  type             ExamQuestionType
+  prompt           String
+  explanation      String?
+  sortOrder        Int
+  points           Int                  @default(1)
+  status           ExamQuestionStatus   @default(DRAFT)
+  origin           ExamQuestionOrigin   @default(MANUAL)
+  aiGenerationJobId String?             @db.Uuid
+  approvedByUserId String?              @db.Uuid
+  approvedAt       DateTime?
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
+  exam             Exam                 @relation(fields: [examId], references: [id], onDelete: Cascade)
+  approvedByUser   User?                @relation("ExamQuestionApprovedBy", fields: [approvedByUserId], references: [id], onDelete: SetNull)
+  options          ExamQuestionOption[]
+  aiGenerationJob  AiQuestionGenerationJob? @relation(fields: [aiGenerationJobId], references: [id], onDelete: SetNull)
+  sourceReferences QuestionSourceReference[]
+
+  @@index([examId, sortOrder])
+  @@index([aiGenerationJobId])
+}
+
+model AiQuestionGenerationJob {
+  id                       String                        @id @default(uuid()) @db.Uuid
+  examId                   String                        @db.Uuid
+  curriculumVersionId      String                        @db.Uuid
+  requestedByUserId        String                        @db.Uuid
+  status                   AiQuestionGenerationJobStatus @default(QUEUED)
+  requestedQuestionCount   Int
+  requestedQuestionTypes   Json
+  provider                 String
+  model                    String?
+  promptVersion            String
+  attemptCount             Int                           @default(0)
+  nextAttemptAt            DateTime?
+  startedAt                DateTime?
+  completedAt              DateTime?
+  failedAt                 DateTime?
+  cancelledAt              DateTime?
+  errorCode                String?
+  createdQuestionCount     Int                           @default(0)
+  rejectedCandidateCount   Int                           @default(0)
+  createdAt                DateTime                      @default(now())
+  updatedAt                DateTime                      @updatedAt
+  exam                     Exam                          @relation(fields: [examId], references: [id], onDelete: Restrict)
+  curriculumVersion        CurriculumVersion             @relation(fields: [curriculumVersionId], references: [id], onDelete: Restrict)
+  requestedByUser          User                          @relation("AiQuestionGenerationRequestedBy", fields: [requestedByUserId], references: [id], onDelete: Restrict)
+  materials                AiQuestionGenerationJobMaterial[]
+  questions                ExamQuestion[]
+
+  @@index([status, nextAttemptAt])
+  @@index([requestedByUserId, status])
+  @@index([examId, createdAt])
+}
+
+model AiQuestionGenerationJobMaterial {
+  id        String                  @id @default(uuid()) @db.Uuid
+  jobId     String                  @db.Uuid
+  materialId String                 @db.Uuid
+  createdAt DateTime                @default(now())
+  job       AiQuestionGenerationJob @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  material  LearningMaterial        @relation(fields: [materialId], references: [id], onDelete: Restrict)
+
+  @@unique([jobId, materialId])
+  @@index([materialId])
+}
+
+model MaterialSourceExtraction {
+  id               String                         @id @default(uuid()) @db.Uuid
+  fileAssetId      String                         @db.Uuid
+  sourceType       MaterialType
+  status           MaterialSourceExtractionStatus @default(PENDING)
+  extractorVersion String
+  extractedAt      DateTime?
+  failureCode      String?
+  metadata         Json?
+  createdAt        DateTime                       @default(now())
+  updatedAt        DateTime                       @updatedAt
+  fileAsset        FileAsset                      @relation(fields: [fileAssetId], references: [id], onDelete: Restrict)
+  chunks           MaterialSourceChunk[]
+
+  @@unique([fileAssetId, extractorVersion])
+  @@index([status])
+}
+
+model MaterialSourceChunk {
+  id           String                   @id @default(uuid()) @db.Uuid
+  extractionId String                   @db.Uuid
+  sequence     Int
+  content      String                   @db.Text
+  locatorType  MaterialSourceLocatorType
+  locator      Json
+  createdAt    DateTime                 @default(now())
+  extraction   MaterialSourceExtraction @relation(fields: [extractionId], references: [id], onDelete: Cascade)
+  references   QuestionSourceReference[]
+
+  @@unique([extractionId, sequence])
+  @@index([extractionId, locatorType])
+}
+
+model QuestionSourceReference {
+  id             String                    @id @default(uuid()) @db.Uuid
+  questionId     String                    @db.Uuid
+  materialId     String                    @db.Uuid
+  sourceChunkId  String?                   @db.Uuid
+  locatorType    MaterialSourceLocatorType
+  pageNumber     Int?
+  startMs        Int?
+  endMs          Int?
+  sheetName      String?
+  cellRange      String?
+  sectionLabel   String?
+  createdAt      DateTime                  @default(now())
+  question       ExamQuestion              @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  material       LearningMaterial          @relation(fields: [materialId], references: [id], onDelete: Restrict)
+  sourceChunk    MaterialSourceChunk?      @relation(fields: [sourceChunkId], references: [id], onDelete: Restrict)
+
+  @@index([questionId])
+  @@index([materialId, sourceChunkId])
+}
+
+model ExamQuestionOption {
+  id         String       @id @default(uuid()) @db.Uuid
+  questionId String       @db.Uuid
+  text       String
+  sortOrder  Int
+  isCorrect  Boolean      @default(false)
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+  question   ExamQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@unique([questionId, sortOrder])
+  @@index([questionId])
+}
+
+model ExamAttempt {
+  id                      String                @id @default(uuid()) @db.Uuid
+  examId                  String                @db.Uuid
+  enrollmentId            String                @db.Uuid
+  participantUserId       String                @db.Uuid
+  attemptNumber           Int
+  status                  ExamAttemptStatus     @default(IN_PROGRESS)
+  passingScoreBasisPoints Int
+  startedAt               DateTime              @default(now())
+  submittedAt             DateTime?
+  scorePoints             Int?
+  maxPoints               Int?
+  scoreBasisPoints        Int?
+  passed                  Boolean?
+  createdAt               DateTime              @default(now())
+  updatedAt               DateTime              @updatedAt
+  exam                    Exam                  @relation(fields: [examId], references: [id], onDelete: Restrict)
+  enrollment              TrainingEnrollment    @relation(fields: [enrollmentId], references: [id], onDelete: Restrict)
+  participant             User                  @relation("ExamAttemptParticipant", fields: [participantUserId], references: [id], onDelete: Restrict)
+  questions               ExamAttemptQuestion[]
+  answers                 ExamAttemptAnswer[]
+
+  @@unique([enrollmentId, examId, attemptNumber])
+  @@index([participantUserId, createdAt])
+  @@index([examId, submittedAt])
+}
+
+model ExamAttemptQuestion {
+  id               String                      @id @default(uuid()) @db.Uuid
+  attemptId        String                      @db.Uuid
+  sourceQuestionId String                      @db.Uuid
+  prompt           String
+  type             ExamQuestionType
+  points           Int
+  sortOrder        Int
+  createdAt        DateTime                    @default(now())
+  attempt          ExamAttempt                 @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  options          ExamAttemptQuestionOption[]
+  answer           ExamAttemptAnswer?
+
+  @@unique([attemptId, sourceQuestionId])
+  @@unique([attemptId, sortOrder])
+}
+
+model ExamAttemptQuestionOption {
+  id                String              @id @default(uuid()) @db.Uuid
+  attemptQuestionId String              @db.Uuid
+  sourceOptionId    String              @db.Uuid
+  text              String
+  sortOrder         Int
+  isCorrect         Boolean             @default(false)
+  createdAt         DateTime            @default(now())
+  attemptQuestion   ExamAttemptQuestion @relation(fields: [attemptQuestionId], references: [id], onDelete: Cascade)
+
+  @@unique([attemptQuestionId, sourceOptionId])
+  @@unique([attemptQuestionId, sortOrder])
+}
+
+model ExamAttemptAnswer {
+  id                String              @id @default(uuid()) @db.Uuid
+  attemptId         String              @db.Uuid
+  attemptQuestionId String              @unique @db.Uuid
+  selectedOptionIds Json
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  attempt           ExamAttempt         @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  attemptQuestion   ExamAttemptQuestion @relation(fields: [attemptQuestionId], references: [id], onDelete: Cascade)
+
+  @@unique([attemptId, attemptQuestionId])
+  @@index([attemptId])
+}
+
+model UserBrandAccess {
+  id              String   @id @default(uuid()) @db.Uuid
+  userId          String   @db.Uuid
+  brandId         String   @db.Uuid
+  createdByUserId String?  @db.Uuid
+  createdAt       DateTime @default(now())
+  user            User     @relation("UserBrandAccessUser", fields: [userId], references: [id], onDelete: Cascade)
+  brand           Brand    @relation(fields: [brandId], references: [id], onDelete: Restrict)
+  createdByUser   User?    @relation("UserBrandAccessGrantedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
+
+  @@unique([userId, brandId])
+  @@index([brandId])
+}
+
+model Role {
+  id              String           @id @default(uuid()) @db.Uuid
+  code            String           @unique
+  name            String
+  description     String?
+  isSystem        Boolean          @default(false)
+  isActive        Boolean          @default(true)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  userRoles       UserRole[]
+  rolePermissions RolePermission[]
+
+  @@index([isActive])
+}
+
+model Permission {
+  id              String           @id @default(uuid()) @db.Uuid
+  code            String           @unique
+  name            String
+  description     String?
+  resource        String
+  action          String
+  isSystem        Boolean          @default(true)
+  createdAt       DateTime         @default(now())
+  rolePermissions RolePermission[]
+}
+
+model UserRole {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @db.Uuid
+  roleId    String   @db.Uuid
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role      Role     @relation(fields: [roleId], references: [id], onDelete: Restrict)
+
+  @@unique([userId, roleId])
+  @@index([roleId])
+}
+
+model RolePermission {
+  id           String     @id @default(uuid()) @db.Uuid
+  roleId       String     @db.Uuid
+  permissionId String     @db.Uuid
+  createdAt    DateTime   @default(now())
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Restrict)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Restrict)
+
+  @@unique([roleId, permissionId])
+  @@index([permissionId])
+}
+
+model AuthSession {
+  id                String    @id @default(uuid()) @db.Uuid
+  userId            String    @db.Uuid
+  tokenHash         String    @unique
+  csrfTokenHash     String
+  createdAt         DateTime  @default(now())
+  lastSeenAt        DateTime  @default(now())
+  idleExpiresAt     DateTime
+  absoluteExpiresAt DateTime
+  revokedAt         DateTime?
+  userAgent         String?
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([idleExpiresAt])
+  @@index([absoluteExpiresAt])
+}
+
+model InvitationToken {
+  id        String    @id @default(uuid()) @db.Uuid
+  userId    String    @db.Uuid
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model PasswordResetToken {
+  id         String    @id @default(uuid()) @db.Uuid
+  userId     String    @db.Uuid
+  tokenHash  String    @unique
+  expiresAt  DateTime
+  consumedAt DateTime?
+  revokedAt  DateTime?
+  createdAt  DateTime  @default(now())
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, expiresAt])
+  @@index([expiresAt])
+}
+
+model NotificationDelivery {
+  id                  String                     @id @default(uuid()) @db.Uuid
+  type                NotificationDeliveryType
+  status              NotificationDeliveryStatus @default(QUEUED)
+  recipientUserId     String?                    @db.Uuid
+  recipientEmail      String
+  provider            String
+  templateVersion     String
+  idempotencyKey      String                     @unique
+  correlationEntityId String?
+  attemptCount        Int                        @default(0)
+  lastAttemptAt       DateTime?
+  nextAttemptAt       DateTime?
+  deliveredAt         DateTime?
+  failureCode         String?
+  createdAt           DateTime                   @default(now())
+  updatedAt           DateTime                   @updatedAt
+  recipientUser       User?                      @relation(fields: [recipientUserId], references: [id], onDelete: SetNull)
+
+  @@index([status, nextAttemptAt])
+  @@index([recipientUserId, createdAt])
+  @@index([type, createdAt])
+}
+
+model TrainingCertificate {
+  id                         String                    @id @default(uuid()) @db.Uuid
+  enrollmentId               String                    @unique @db.Uuid
+  participantUserId          String                    @db.Uuid
+  brandId                    String                    @db.Uuid
+  curriculumVersionId        String                    @db.Uuid
+  certificateNumber          String                    @unique
+  status                     TrainingCertificateStatus @default(ISSUED)
+  templateVersion            String
+  participantNameSnapshot    String
+  brandNameSnapshot          String
+  curriculumNameSnapshot     String
+  curriculumVersionSnapshot  String
+  completionDateSnapshot     DateTime
+  issuedAt                   DateTime                  @default(now())
+  issuedByUserId             String?                   @db.Uuid
+  revokedAt                  DateTime?
+  revokedByUserId            String?                   @db.Uuid
+  revocationReason           String?
+  pdfFileAssetId             String?                   @unique @db.Uuid
+  pdfStatus                  CertificatePdfStatus      @default(PENDING)
+  pdfFailureCode             String?
+  createdAt                  DateTime                  @default(now())
+  updatedAt                  DateTime                  @updatedAt
+  enrollment                 TrainingEnrollment        @relation(fields: [enrollmentId], references: [id], onDelete: Restrict)
+  participant                User                      @relation("CertificateParticipant", fields: [participantUserId], references: [id], onDelete: Restrict)
+  brand                      Brand                     @relation(fields: [brandId], references: [id], onDelete: Restrict)
+  curriculumVersion          CurriculumVersion         @relation(fields: [curriculumVersionId], references: [id], onDelete: Restrict)
+  issuedByUser               User?                     @relation("CertificateIssuedBy", fields: [issuedByUserId], references: [id], onDelete: SetNull)
+  revokedByUser              User?                     @relation("CertificateRevokedBy", fields: [revokedByUserId], references: [id], onDelete: SetNull)
+  pdfFileAsset               FileAsset?                @relation("CertificatePdfAsset", fields: [pdfFileAssetId], references: [id], onDelete: SetNull)
+
+  @@index([participantUserId])
+  @@index([brandId])
+  @@index([status])
+  @@index([issuedAt])
+}
+
+model AuthSecurityEvent {
+  id        String                @id @default(uuid()) @db.Uuid
+  eventType AuthSecurityEventType
+  userId    String?               @db.Uuid
+  requestId String?
+  metadata  Json?
+  createdAt DateTime              @default(now())
+  user      User?                 @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([eventType, createdAt])
+}

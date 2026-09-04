@@ -1,0 +1,9 @@
+-- Persist only authoritative lifecycle timestamps. Progress percentages remain derived.
+ALTER TABLE "TrainingEnrollment"
+ADD COLUMN "startedAt" TIMESTAMP(3),
+ADD COLUMN "completedAt" TIMESTAMP(3);
+
+ALTER TYPE "AuthSecurityEventType" ADD VALUE IF NOT EXISTS 'TRAINING_ENROLLMENT_STARTED';
+ALTER TYPE "AuthSecurityEventType" ADD VALUE IF NOT EXISTS 'TRAINING_ENROLLMENT_COMPLETED';
+ALTER TYPE "AuthSecurityEventType" ADD VALUE IF NOT EXISTS 'TRAINING_ENROLLMENT_FAILED';
+ALTER TYPE "AuthSecurityEventType" ADD VALUE IF NOT EXISTS 'TRAINING_PROGRESS_ACCESS_DENIED';

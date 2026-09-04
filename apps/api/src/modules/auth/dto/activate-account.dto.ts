@@ -1,0 +1,18 @@
+import { IsString, MaxLength, MinLength } from 'class-validator';
+
+export class ActivateAccountDto {
+  @IsString()
+  @MinLength(1)
+  @MaxLength(512)
+  token!: string;
+
+  @IsString()
+  @MinLength(12)
+  @MaxLength(128)
+  password!: string;
+
+  @IsString()
+  @MinLength(12)
+  @MaxLength(128)
+  confirmPassword!: string;
+}
